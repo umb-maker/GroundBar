@@ -1,0 +1,9 @@
+.build/
+build/
+dist/
+.DS_Store
+
+# Local only
+scripts/signing.local
+docs/analisi-ubar.md
+Resources/omega-source.jpg
