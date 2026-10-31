@@ -1,78 +1,81 @@
 # OmniBar
 
-Una barra delle applicazioni per macOS in basso sullo schermo, con menu Start, elenco dei documenti aperti per ogni app, file recenti, widget Bitcoin e temi. Scritta in Swift/SwiftUI + AppKit, senza dipendenze esterne.
+**English** · [Italiano](README.it.md)
 
-*A bottom taskbar for macOS with a Start menu, per-app document lists, recent files, a Bitcoin widget and themes. Native Swift/SwiftUI + AppKit, no third-party dependencies. The UI is in Italian.*
+A Windows-style taskbar for macOS: a bottom bar with a Start menu, a list of each app's open documents, recent files, a Bitcoin widget and themes. Native Swift/SwiftUI + AppKit, public APIs only, no third-party dependencies.
 
-![OmniBar, tema scuro](docs/images/bar-dark.png)
-![OmniBar, tema Halloween](docs/images/bar-halloween.png)
+![OmniBar, dark theme](docs/images/bar-dark.png)
+![OmniBar, Halloween theme](docs/images/bar-halloween.png)
 
-## Funzioni
+> **Note:** the user interface is currently in Italian. An English localisation is planned.
 
-- **Menu Start**: app aggiunte, *Consigliati* con i file aperti di recente, *Tutte le app*, ricerca di app **e file** (Invio apre, ↑↓ per scegliere), menu di arresto.
-- **App fissate e aperte** in un'unica barra, con indicatore dell'app attiva. Le app non fissate compaiono solo finché hanno finestre aperte.
-- **Elenco dei documenti per app**: passando sopra un'icona o cliccandola si vedono tutti i documenti aperti, anche quelli ridotti a icona. Un clic porta in primo piano il documento scelto, la ✕ lo chiude.
-- **Documenti recenti** nel clic destro su ogni app (Word, Excel, lettore PDF…).
-- **Cartelle e file fissati**: trascinali sulla barra.
-- **Screenshot** di una porzione o di tutto lo schermo, salvati e copiati negli appunti.
-- **Widget Bitcoin**: prezzo in euro, variazione e grafico delle 24 ore. Con un clic si apre un grafico da 24 ore a 1 anno (dati CoinGecko).
-- **Impostazioni rapide**: rete, volume, batteria, tema.
-- **Mostra desktop**, sul bordo destro della barra.
-- **Temi**: Sistema, Chiaro, Scuro, **Halloween** 🎃.
-- **Scorciatoie**: ⌃⌥1…9 apre l'app n-esima, ⌃⌥Spazio apre Start, ⌃⌥D mostra il desktop.
-- **Avvio automatico** con il Mac, da attivare dal menu del clic destro sulla barra.
+## Features
 
-| Elenco documenti | Bitcoin | Impostazioni rapide |
+- **Start menu**: pinned apps, *Recommended* recent files, *All apps*, and search across apps **and files** (Return opens, ↑↓ to select), plus a power menu.
+- **Pinned and running apps** in one bar, with an active-app indicator. Apps that aren't pinned only show up while they have open windows.
+- **Per-app document list**: hover or click an icon to see every open document of that app, minimised ones included. Click one to bring it to the front, or close it with ✕.
+- **Recent documents** (jump lists) in each app's right-click menu, e.g. Word, Excel or a PDF reader.
+- **Pin folders and files** by dragging them onto the bar.
+- **Screenshots** of a region or of the whole screen, saved to disk and copied to the clipboard.
+- **Bitcoin widget**: price in euro, 24-hour change and sparkline. Click it for a chart from 24 hours to 1 year (data from CoinGecko).
+- **Quick settings**: network, volume, battery, theme.
+- **Show desktop** strip on the right edge.
+- **Themes**: System, Light, Dark and **Halloween** 🎃.
+- **Global shortcuts**: ⌃⌥1…9 opens the n-th app, ⌃⌥Space opens Start, ⌃⌥D shows the desktop.
+- **Launch at login**, from the bar's right-click menu.
+
+| Document list | Bitcoin | Quick settings |
 |---|---|---|
 | ![](docs/images/window-list.png) | ![](docs/images/btc.png) | ![](docs/images/quick-settings.png) |
 
-## Requisiti
+## Requirements
 
-macOS 14 (Sonoma) o successivo, su Apple Silicon o Intel.
+macOS 14 (Sonoma) or later, on Apple silicon or Intel.
 
-## Installazione
+## Installation
 
-### Dalla Release
-1. Scarica `OmniBar.zip` dalla pagina [Releases](../../releases), estrailo e sposta `OmniBar.app` in **Applicazioni**.
-2. L'app non è notarizzata da Apple, quindi al primo avvio macOS la blocca. Apri **Impostazioni di Sistema › Privacy e sicurezza** e premi **Apri comunque**.
+### From a release
+1. Download `OmniBar.zip` from [Releases](../../releases), unzip it and move `OmniBar.app` to **Applications**.
+2. The app isn't notarised by Apple, so macOS blocks it on first launch. Open **System Settings › Privacy & Security** and click **Open Anyway**.
 
-### Dal codice sorgente
-Bastano i Command Line Tools (`xcode-select --install`), Xcode non serve:
+### From source
+Apple's Command Line Tools are enough (`xcode-select --install`); Xcode is not required.
 
 ```sh
-./scripts/bundle.sh            # crea build/OmniBar.app
-./scripts/bundle.sh universal  # Apple Silicon + Intel
+./scripts/bundle.sh            # builds build/OmniBar.app
+./scripts/bundle.sh universal  # Apple silicon + Intel
 open build/OmniBar.app
 ```
 
-## Permessi
+## Permissions
 
-Si concedono in **Impostazioni di Sistema › Privacy e sicurezza**.
+Grant them in **System Settings › Privacy & Security**.
 
-| Permesso | A cosa serve |
+| Permission | What it's for |
 |---|---|
-| **Accessibilità** | Elencare le finestre e i documenti aperti, portarli in primo piano, ripristinarli, chiuderli |
-| **Registrazione schermo** | Titoli delle finestre e screenshot |
-| **Automazione › System Events** | Sospendi, Riavvia, Arresta e Logout dal menu Start (viene chiesto al primo uso) |
+| **Accessibility** | Listing open windows and documents, bringing them to the front, restoring and closing them |
+| **Screen Recording** | Window titles and screenshots |
+| **Automation › System Events** | Sleep, Restart, Shut Down and Log Out from the Start menu (asked on first use) |
 
-Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. Per evitarlo, firma l'app con un'identità stabile: imposta `OMNIBAR_SIGN_IDENTITY` oppure crea `scripts/signing.local` con `OMNIBAR_SIGN_IDENTITY="Nome identità"`.
+With ad-hoc signing, macOS may ask for the permissions again after every rebuild. To avoid that, sign with a stable identity: set `OMNIBAR_SIGN_IDENTITY`, or create `scripts/signing.local` containing `OMNIBAR_SIGN_IDENTITY="Your identity"`.
 
-## Limiti noti
+## Known limitations
 
-- macOS non permette a un'app di riservare spazio sul bordo dello schermo, quindi le finestre ingrandite possono finire sotto la barra. Conviene nascondere il Dock in automatico (clic destro sulla barra › *Nascondi automaticamente il Dock*).
-- Le schede dentro una stessa finestra (per esempio più PDF a schede) compaiono come un solo documento.
-- Vengono elencate solo le finestre della scrivania (Spazio) corrente.
-- Le icone della barra dei menu di altre app non compaiono nella tray.
-- La barra compare solo sullo schermo principale.
+- macOS doesn't let an app reserve space at the edge of the screen, so maximised windows can extend under the bar. Hiding the Dock automatically helps (right-click the bar › *Nascondi automaticamente il Dock*).
+- Tabs inside one window (e.g. several PDFs in tabs) appear as a single document.
+- Only windows on the current Space are listed.
+- Other apps' menu bar icons don't appear in the tray.
+- The bar is shown on the main display only.
 
-## Sviluppo
+## Development
 
-- `.build/debug/OmniBar --snapshot <cartella>` salva in PNG la barra e i pannelli, poi esce.
-- I log diagnostici vanno in `~/Library/Logs/OmniBar.log`.
-- Il codice usa solo API pubbliche di macOS: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon per le scorciatoie globali, ServiceManagement.
+- `.build/debug/OmniBar --snapshot <folder>` saves PNGs of the bar and its panels, then quits.
+- Diagnostic logs go to `~/Library/Logs/OmniBar.log`.
+- `scripts/social-preview.swift` renders the repository's social preview image.
+- Only public macOS APIs are used: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon (global hotkeys) and ServiceManagement.
 
-OmniBar è ispirata a barre delle applicazioni come uBar e a quella di Windows 11, ma non ne contiene codice.
+OmniBar is inspired by taskbars such as uBar and the Windows 11 taskbar, but contains none of their code.
 
-## Licenza
+## License
 
 [MIT](LICENSE) © 2026 csvnm
