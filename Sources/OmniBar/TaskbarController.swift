@@ -70,6 +70,57 @@ final class TaskbarController {
         }
         hk.register(keyCode: HotKeyCenter.space) { [weak self] in self?.toggleStart() }
         hk.register(keyCode: HotKeyCenter.d) { [weak self] in self?.closeFlyout(); self?.model.toggleDesktop() }
+
+        watchFullScreen()
+    }
+
+    // MARK: Full screen
+
+    private var hiddenForFullScreen = false
+    private var fullScreenTimer: Timer?
+
+    /// Hides the bar while the frontmost app fills the screen. Native full screen already lives in its own
+    /// Space (where the bar isn't shown); this also covers apps that just make a screen-sized window.
+    private func watchFullScreen() {
+        let nc = NSWorkspace.shared.notificationCenter
+        for name in [NSWorkspace.activeSpaceDidChangeNotification, NSWorkspace.didActivateApplicationNotification] {
+            nc.addObserver(forName: name, object: nil, queue: .main) { _ in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    MainActor.assumeIsolated { TaskbarController.shared.updateFullScreen() }
+                }
+            }
+        }
+        fullScreenTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            MainActor.assumeIsolated { TaskbarController.shared.updateFullScreen() }
+        }
+    }
+
+    func updateFullScreen() {
+        let covered = frontAppCoversScreen()
+        guard covered != hiddenForFullScreen else { return }
+        hiddenForFullScreen = covered
+        if covered {
+            closeFlyout()
+            hidePreview()
+            bar.orderOut(nil)
+        } else {
+            bar.orderFrontRegardless()
+        }
+    }
+
+    /// Whether the frontmost app has an on-screen window as large as the main screen
+    /// (window bounds and screen frame both start at the top-left of the main screen).
+    private func frontAppCoversScreen() -> Bool {
+        guard let front = NSWorkspace.shared.frontmostApplication, front.processIdentifier != getpid() else { return false }
+        let s = screen.frame
+        let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
+        return windows.contains { w in
+            guard (w[kCGWindowOwnerPID as String] as? pid_t) == front.processIdentifier,
+                  (w[kCGWindowLayer as String] as? Int) == 0,
+                  let bounds = w[kCGWindowBounds as String] as? NSDictionary,
+                  let r = CGRect(dictionaryRepresentation: bounds) else { return false }
+            return r.minX <= 1 && r.minY <= 1 && r.width >= s.width - 1 && r.height >= s.height - 1
+        }
     }
 
     private func configure(_ p: NSPanel) {
@@ -79,7 +130,8 @@ final class TaskbarController {
         p.isOpaque = false
         p.hidesOnDeactivate = false
         p.isMovable = false
-        p.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
+        // No .fullScreenAuxiliary: the bar must not be drawn over full-screen apps (videos, presentations).
+        p.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
         p.appearance = model.theme.appearance
     }
 
