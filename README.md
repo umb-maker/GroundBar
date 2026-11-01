@@ -74,7 +74,6 @@ With ad-hoc signing, macOS may ask for the permissions again after every rebuild
 - `scripts/social-preview.swift` renders the repository's social preview image.
 - Only public macOS APIs are used: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon (global hotkeys) and ServiceManagement.
 
-OmniBar is inspired by taskbars such as uBar and the Windows 11 taskbar, but contains none of their code.
 
 ## License
 
