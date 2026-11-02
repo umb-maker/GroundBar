@@ -13,9 +13,9 @@ struct SantaDecor: NSViewRepresentable {
         /// One flight takes `flight` seconds and starts again every `cycle` seconds.
         private static let flight: Double = 12
         private static let cycle: Double = 26
-        /// `OMNIBAR_DEBUG_SLEIGH=<fraction of the bar width>` parks the sleigh there without animating
+        /// `GROUNDBAR_DEBUG_SLEIGH=<fraction of the bar width>` parks the sleigh there without animating
         /// (for `--snapshot` checks; `1` means the middle of the bar).
-        private static let debugParked: CGFloat? = ProcessInfo.processInfo.environment["OMNIBAR_DEBUG_SLEIGH"]
+        private static let debugParked: CGFloat? = ProcessInfo.processInfo.environment["GROUNDBAR_DEBUG_SLEIGH"]
             .flatMap(Double.init).map { $0 >= 1 ? 0.4 : CGFloat($0) }
 
         private var built: CGSize = .zero

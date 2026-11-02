@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// OmniBar's settings window (bar menu › Settings…, or the gear in the Start menu).
+/// Groundbar's settings window (bar menu › Settings…, or the gear in the Start menu).
 @MainActor
 enum SettingsWindow {
     private(set) static var window: NSWindow?
@@ -16,7 +16,7 @@ enum SettingsWindow {
         let c = TaskbarController.shared
         let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 500, height: 790),
                          styleMask: [.titled, .closable], backing: .buffered, defer: false)
-        w.title = L("OmniBar Settings")
+        w.title = L("Groundbar Settings")
         w.isReleasedWhenClosed = false
         w.appearance = c.model.theme.appearance
         let host = NSHostingView(rootView: SettingsView(model: c.model, ticker: c.crypto, updater: c.updater))
@@ -80,7 +80,7 @@ struct SettingsView: View {
 
             Section("About") {
                 LabeledContent("Source code") {
-                    Link("github.com/umb-maker/OmniBar", destination: URL(string: "https://github.com/umb-maker/OmniBar")!)
+                    Link("github.com/umb-maker/Groundbar", destination: URL(string: "https://github.com/umb-maker/Groundbar")!)
                 }
                 LabeledContent("License", value: "MIT")
                 LabeledContent("Permissions") {
@@ -107,12 +107,12 @@ struct SettingsView: View {
                 Text("Checking…").foregroundStyle(.secondary)
             }
         case .upToDate:
-            Label("OmniBar is up to date", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+            Label("Groundbar is up to date", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
         case .available(let release):
             Button {
                 NSWorkspace.shared.open(release.url)
             } label: {
-                Label("Download OmniBar \(release.version)", systemImage: "arrow.down.circle.fill")
+                Label("Download Groundbar \(release.version)", systemImage: "arrow.down.circle.fill")
             }
             .buttonStyle(.link)
         case .failed:

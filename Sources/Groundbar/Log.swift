@@ -1,12 +1,12 @@
 import Foundation
 
-/// Minimal diagnostics in ~/Library/Logs/OmniBar.log: start-up, permission state and errors only.
+/// Minimal diagnostics in ~/Library/Logs/Groundbar.log: start-up, permission state and errors only.
 /// Never log window titles, file names or other user content. The file is capped at 1 MB and rotated
-/// to OmniBar.old.log, so it never grows without limit.
+/// to Groundbar.old.log, so it never grows without limit.
 enum Log {
     private static let dir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs")
-    private static let url = dir.appendingPathComponent("OmniBar.log")
-    private static let old = dir.appendingPathComponent("OmniBar.old.log")
+    private static let url = dir.appendingPathComponent("Groundbar.log")
+    private static let old = dir.appendingPathComponent("Groundbar.old.log")
     private static let maxBytes = 1_000_000
 
     static func write(_ message: String) {

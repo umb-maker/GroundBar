@@ -1,12 +1,14 @@
-# OmniBar
+# Groundbar
 
 [English](README.md) · **Italiano**
 
 Una barra delle applicazioni per macOS in basso sullo schermo, con menu Start, elenco dei documenti aperti per ogni app, file recenti, widget Bitcoin e temi. Scritta in Swift/SwiftUI + AppKit, senza dipendenze esterne.
 
-Disponibile in **italiano** e **inglese**: OmniBar segue la lingua impostata in macOS.
+Disponibile in **italiano** e **inglese**: Groundbar segue la lingua impostata in macOS.
 
-![Demo di OmniBar: menu Start, elenco documenti, widget Bitcoin, temi stagionali](docs/images/demo.gif)
+*Groundbar si chiamava OmniBar fino alla versione 0.2.0.*
+
+![Demo di Groundbar: menu Start, elenco documenti, widget Bitcoin, temi stagionali](docs/images/demo.gif)
 
 ## Funzioni
 
@@ -23,7 +25,7 @@ Disponibile in **italiano** e **inglese**: OmniBar segue la lingua impostata in 
 - **Scorciatoie**: ⌃⌥1…9 apre l'app n-esima, ⌃⌥Spazio apre Start, ⌃⌥D mostra il desktop.
 - **Avvio automatico** con il Mac, da attivare dal menu del clic destro sulla barra.
 - **Finestra Impostazioni**: tema, disposizione delle icone, widget Bitcoin e valuta (EUR/USD), pulsanti screenshot, scorciatoie, aggiornamenti.
-- **Avvisi di aggiornamento**: una volta al giorno OmniBar controlla su GitHub e ti avvisa quando esce una nuova versione (non installa mai niente da sola).
+- **Avvisi di aggiornamento**: una volta al giorno Groundbar controlla su GitHub e ti avvisa quando esce una nuova versione (non installa mai niente da sola).
 
 | Elenco documenti | Bitcoin | Impostazioni rapide |
 |---|---|---|
@@ -36,16 +38,16 @@ macOS 14 (Sonoma) o successivo, su Apple Silicon o Intel.
 ## Installazione
 
 ### Dalla Release
-1. Scarica `OmniBar.zip` dalla pagina [Releases](../../releases), estrailo e sposta `OmniBar.app` in **Applicazioni**.
+1. Scarica `Groundbar.zip` dalla pagina [Releases](../../releases), estrailo e sposta `Groundbar.app` in **Applicazioni**.
 2. L'app non è notarizzata da Apple, quindi al primo avvio macOS la blocca. Apri **Impostazioni di Sistema › Privacy e sicurezza** e premi **Apri comunque**.
 
 ### Dal codice sorgente
 Bastano i Command Line Tools (`xcode-select --install`), Xcode non serve:
 
 ```sh
-./scripts/bundle.sh            # crea build/OmniBar.app
+./scripts/bundle.sh            # crea build/Groundbar.app
 ./scripts/bundle.sh universal  # Apple Silicon + Intel
-open build/OmniBar.app
+open build/Groundbar.app
 ```
 
 ## Permessi
@@ -58,20 +60,20 @@ Al primo avvio una finestra di benvenuto spiega ogni permesso, apre le impostazi
 | **Registrazione schermo** | Titoli delle finestre e screenshot |
 | **Automazione › System Events** | Sospendi, Riavvia, Arresta e Logout dal menu Start (viene chiesto al primo uso) |
 
-Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. Per evitarlo, firma l'app con un'identità stabile: imposta `OMNIBAR_SIGN_IDENTITY` oppure crea `scripts/signing.local` con `OMNIBAR_SIGN_IDENTITY="Nome identità"`.
+Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. Per evitarlo, firma l'app con un'identità stabile: imposta `GROUNDBAR_SIGN_IDENTITY` oppure crea `scripts/signing.local` con `GROUNDBAR_SIGN_IDENTITY="Nome identità"`.
 
 ## Privacy e sicurezza
 
-- **Nessuna telemetria, nessun account.** OmniBar fa due tipi di connessione, entrambe in HTTPS e senza informazioni su di te: l'API pubblica di CoinGecko per il prezzo del Bitcoin (spenta se nascondi il widget) e, una volta al giorno, l'API pubblica di GitHub per controllare se c'è una nuova versione (si disattiva in Impostazioni › Aggiornamenti).
+- **Nessuna telemetria, nessun account.** Groundbar fa due tipi di connessione, entrambe in HTTPS e senza informazioni su di te: l'API pubblica di CoinGecko per il prezzo del Bitcoin (spenta se nascondi il widget) e, una volta al giorno, l'API pubblica di GitHub per controllare se c'è una nuova versione (si disattiva in Impostazioni › Aggiornamenti).
 - **I permessi sono usati solo in locale.** Accessibilità serve a elencare, portare in primo piano e chiudere le finestre e a sapere quale documento mostra ciascuna; Registrazione schermo serve per i titoli delle finestre e gli screenshot. Niente esce dal tuo Mac.
-- **Cosa salva OmniBar sul tuo Mac:**
-  - impostazioni ed elenchi di app e documenti recenti (percorsi dei file), in `~/Library/Preferences/app.omnibar.OmniBar.plist`;
+- **Cosa salva Groundbar sul tuo Mac:**
+  - impostazioni ed elenchi di app e documenti recenti (percorsi dei file), in `~/Library/Preferences/app.groundbar.Groundbar.plist`;
   - gli screenshot, nella cartella che macOS usa per gli screenshot;
-  - un piccolo log diagnostico, `~/Library/Logs/OmniBar.log`: solo avvio ed errori, mai titoli di finestre o nomi di file, al massimo 1 MB.
+  - un piccolo log diagnostico, `~/Library/Logs/Groundbar.log`: solo avvio ed errori, mai titoli di finestre o nomi di file, al massimo 1 MB.
 - **Comandi che esegue:** `screencapture` per gli screenshot, `pmset displaysleepnow` per bloccare lo schermo, System Events per Sospendi, Riavvia, Arresta e Logout, e `defaults write com.apple.dock autohide` + `killall Dock` solo se scegli *Nascondi automaticamente il Dock*.
 - **Nessuna dipendenza di terze parti**, e il codice è aperto.
-- **Verifica il download.** L'app non è notarizzata da Apple, quindi ogni Release riporta l'impronta SHA-256 di `OmniBar.zip`. Confrontala con `shasum -a 256 OmniBar.zip`.
-- **Per rimuovere tutto:** chiudi OmniBar, cancella l'app, poi esegui `defaults delete app.omnibar.OmniBar` e cancella `~/Library/Logs/OmniBar*.log`.
+- **Verifica il download.** L'app non è notarizzata da Apple, quindi ogni Release riporta l'impronta SHA-256 di `Groundbar.zip`. Confrontala con `shasum -a 256 Groundbar.zip`.
+- **Per rimuovere tutto:** chiudi Groundbar, cancella l'app, poi esegui `defaults delete app.groundbar.Groundbar` e cancella `~/Library/Logs/Groundbar*.log`.
 
 ## Limiti noti
 
@@ -80,11 +82,11 @@ Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. 
 - Vengono elencate solo le finestre della scrivania (Spazio) corrente.
 - Le icone della barra dei menu di altre app non compaiono nella tray.
 - La barra compare solo sullo schermo principale.
-- Per leggere le finestre di alcune app (per esempio Microsoft Office), OmniBar attiva la loro interfaccia di accessibilità; in rari casi questo può rallentare le animazioni delle finestre di quelle app.
+- Per leggere le finestre di alcune app (per esempio Microsoft Office), Groundbar attiva la loro interfaccia di accessibilità; in rari casi questo può rallentare le animazioni delle finestre di quelle app.
 
 ## Sviluppo
 
-- `.build/debug/OmniBar --snapshot <cartella>` salva in PNG la barra e i pannelli, poi esce. `OMNIBAR_DEMO=1` usa app e file d'esempio, `OMNIBAR_SNAPSHOT_STEPS=bar,start` limita i passaggi.
+- `.build/debug/Groundbar --snapshot <cartella>` salva in PNG la barra e i pannelli, poi esce. `GROUNDBAR_DEMO=1` usa app e file d'esempio, `GROUNDBAR_SNAPSHOT_STEPS=bar,start` limita i passaggi.
 - `scripts/demo-gif.swift` crea la GIF dimostrativa del README da quelle immagini.
 - Il codice usa solo API pubbliche di macOS: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon per le scorciatoie globali, ServiceManagement.
 

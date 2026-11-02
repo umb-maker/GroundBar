@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "OmniBar",
+    name: "Groundbar",
     platforms: [.macOS(.v14)],
     targets: [
         .executableTarget(
-            name: "OmniBar",
-            path: "Sources/OmniBar",
+            name: "Groundbar",
+            path: "Sources/Groundbar",
             linkerSettings: [
                 .linkedFramework("ScreenCaptureKit"),
                 .linkedFramework("Carbon"),

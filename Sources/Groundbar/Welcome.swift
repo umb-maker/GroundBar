@@ -18,7 +18,7 @@ enum LoginItem {
     static var binding: Binding<Bool> { Binding(get: { isEnabled }, set: { set($0) }) }
 }
 
-/// Live state of the two privacy permissions OmniBar needs.
+/// Live state of the two privacy permissions Groundbar needs.
 @MainActor
 final class PermissionState: ObservableObject {
     @Published private(set) var accessibility = AXIsProcessTrusted()
@@ -39,14 +39,14 @@ final class PermissionState: ObservableObject {
         if screen != screenRecording { screenRecording = screen }
     }
 
-    /// Adds OmniBar to the Accessibility list (with the system prompt) and opens that pane.
+    /// Adds Groundbar to the Accessibility list (with the system prompt) and opens that pane.
     func requestAccessibility() {
         let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
         _ = AXIsProcessTrustedWithOptions(opts)
         TaskbarController.openSettings("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
     }
 
-    /// Adds OmniBar to the Screen Recording list (with the system prompt) and opens that pane.
+    /// Adds Groundbar to the Screen Recording list (with the system prompt) and opens that pane.
     func requestScreenRecording() {
         _ = CGRequestScreenCaptureAccess()
         TaskbarController.openSettings("x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")
@@ -115,8 +115,8 @@ struct WelcomeView: View {
         VStack(spacing: 0) {
             VStack(spacing: 10) {
                 Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 84, height: 84)
-                Text("Welcome to OmniBar").font(.system(size: 24, weight: .bold))
-                Text("A Windows-style taskbar for your Mac. To list your windows and documents, OmniBar needs two macOS permissions.")
+                Text("Welcome to Groundbar").font(.system(size: 24, weight: .bold))
+                Text("A Windows-style taskbar for your Mac. To list your windows and documents, Groundbar needs two macOS permissions.")
                     .font(.system(size: 13)).foregroundStyle(f.secondary)
                     .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             }
@@ -130,7 +130,7 @@ struct WelcomeView: View {
                               detail: "Reads window titles and takes the screenshots you ask for.",
                               granted: permissions.screenRecording, action: permissions.requestScreenRecording)
                 if !permissions.screenRecording {
-                    Text("After allowing Screen Recording, macOS may ask you to quit and reopen OmniBar.")
+                    Text("After allowing Screen Recording, macOS may ask you to quit and reopen Groundbar.")
                         .font(.system(size: 11)).foregroundStyle(f.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 4)
                 }
@@ -152,7 +152,7 @@ struct WelcomeView: View {
 
             HStack(alignment: .center, spacing: 12) {
                 Image(systemName: "lock.shield").foregroundStyle(f.secondary)
-                Text("Nothing about you leaves your Mac: OmniBar only fetches the Bitcoin price from CoinGecko and checks GitHub for updates.")
+                Text("Nothing about you leaves your Mac: Groundbar only fetches the Bitcoin price from CoinGecko and checks GitHub for updates.")
                     .font(.system(size: 11)).foregroundStyle(f.secondary).fixedSize(horizontal: false, vertical: true)
                 Spacer()
                 Button(permissions.allGranted ? "Get Started" : "Later") { WelcomeWindow.close() }

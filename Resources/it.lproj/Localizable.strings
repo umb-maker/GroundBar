@@ -1,4 +1,4 @@
-/* OmniBar – Italian translation. Keys are the English source strings. */
+/* Groundbar – Italian translation. Keys are the English source strings. */
 
 /* Themes */
 "System" = "Sistema";
@@ -27,7 +27,7 @@
 "Automatically Hide the Dock" = "Nascondi automaticamente il Dock";
 "Setup & Permissions…" = "Configurazione e permessi…";
 "Settings…" = "Impostazioni…";
-"Quit OmniBar" = "Esci da OmniBar";
+"Quit Groundbar" = "Esci da Groundbar";
 
 /* Start menu */
 "Search apps and files" = "Cerca app e file";
@@ -50,7 +50,7 @@
 "Power" = "Arresta";
 
 /* Window list */
-"OmniBar needs the Accessibility permission to list windows." = "Per elencare le finestre OmniBar ha bisogno del permesso Accessibilità.";
+"Groundbar needs the Accessibility permission to list windows." = "Per elencare le finestre Groundbar ha bisogno del permesso Accessibilità.";
 "Open Accessibility Settings" = "Apri Impostazioni Accessibilità";
 "Close window" = "Chiudi finestra";
 "Minimized" = "Ridotto a icona";
@@ -81,23 +81,23 @@
 "at" = "alle";
 
 /* Welcome window */
-"Welcome to OmniBar" = "Benvenuto in OmniBar";
-"A Windows-style taskbar for your Mac. To list your windows and documents, OmniBar needs two macOS permissions." = "Una barra delle applicazioni in stile Windows per il tuo Mac. Per elencare finestre e documenti, OmniBar ha bisogno di due permessi di macOS.";
+"Welcome to Groundbar" = "Benvenuto in Groundbar";
+"A Windows-style taskbar for your Mac. To list your windows and documents, Groundbar needs two macOS permissions." = "Una barra delle applicazioni in stile Windows per il tuo Mac. Per elencare finestre e documenti, Groundbar ha bisogno di due permessi di macOS.";
 "Accessibility" = "Accessibilità";
 "Lists your open windows and documents, brings them to the front and closes them." = "Elenca le finestre e i documenti aperti, li porta in primo piano e li chiude.";
 "Screen Recording" = "Registrazione schermo";
 "Reads window titles and takes the screenshots you ask for." = "Legge i titoli delle finestre e fa gli screenshot che richiedi.";
-"After allowing Screen Recording, macOS may ask you to quit and reopen OmniBar." = "Dopo aver consentito la Registrazione schermo, macOS potrebbe chiederti di chiudere e riaprire OmniBar.";
+"After allowing Screen Recording, macOS may ask you to quit and reopen Groundbar." = "Dopo aver consentito la Registrazione schermo, macOS potrebbe chiederti di chiudere e riaprire Groundbar.";
 "The Dock can cover the bar: hide it automatically." = "Il Dock può coprire la barra: nascondilo automaticamente.";
 "Hide the Dock" = "Nascondi il Dock";
-"Nothing about you leaves your Mac: OmniBar only fetches the Bitcoin price from CoinGecko and checks GitHub for updates." = "Nessun tuo dato esce dal Mac: OmniBar scarica solo il prezzo del Bitcoin da CoinGecko e controlla gli aggiornamenti su GitHub.";
+"Nothing about you leaves your Mac: Groundbar only fetches the Bitcoin price from CoinGecko and checks GitHub for updates." = "Nessun tuo dato esce dal Mac: Groundbar scarica solo il prezzo del Bitcoin da CoinGecko e controlla gli aggiornamenti su GitHub.";
 "Allow…" = "Consenti…";
 "Allowed" = "Attivo";
 "Get Started" = "Inizia";
 "Later" = "Più tardi";
 
 /* Settings */
-"OmniBar Settings" = "Impostazioni di OmniBar";
+"Groundbar Settings" = "Impostazioni di Groundbar";
 "Settings" = "Impostazioni";
 "General" = "Generale";
 "Dock" = "Dock";
@@ -123,10 +123,10 @@
 "Last checked %@" = "Ultimo controllo: %@";
 "Never checked" = "Mai controllato";
 "Checking…" = "Controllo in corso…";
-"OmniBar is up to date" = "OmniBar è aggiornata";
-"Download OmniBar %@" = "Scarica OmniBar %@";
+"Groundbar is up to date" = "Groundbar è aggiornata";
+"Download Groundbar %@" = "Scarica Groundbar %@";
 "Couldn't reach GitHub" = "Impossibile contattare GitHub";
 
 /* Update notice */
-"OmniBar %@ is available" = "È disponibile OmniBar %@";
+"Groundbar %@ is available" = "È disponibile Groundbar %@";
 "Click to open the download page" = "Clic per aprire la pagina di download";

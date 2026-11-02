@@ -22,8 +22,8 @@ final class Updater: ObservableObject {
         }
     }
 
-    static let releasesPage = URL(string: "https://github.com/umb-maker/OmniBar/releases")!
-    private static let latestAPI = URL(string: "https://api.github.com/repos/umb-maker/OmniBar/releases/latest")!
+    static let releasesPage = URL(string: "https://github.com/umb-maker/Groundbar/releases")!
+    private static let latestAPI = URL(string: "https://api.github.com/repos/umb-maker/Groundbar/releases/latest")!
     private static let automaticKey = "checkForUpdates"
     private static let lastCheckKey = "lastUpdateCheck"
     private static let notifiedKey = "notifiedVersion"
@@ -85,7 +85,7 @@ final class Updater: ObservableObject {
     }
 
     private func notify(_ release: Release) {
-        TaskbarController.shared.showToast(title: L("OmniBar \(release.version) is available"),
+        TaskbarController.shared.showToast(title: L("Groundbar \(release.version) is available"),
                                            detail: L("Click to open the download page"),
                                            symbol: "arrow.down.circle") {
             NSWorkspace.shared.open(release.url)

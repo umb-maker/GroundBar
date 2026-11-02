@@ -1,4 +1,4 @@
-// Renders the GitHub social preview (1280x640) for OmniBar.
+// Renders the GitHub social preview (1280x640) for Groundbar.
 // Usage: swift scripts/social-preview.swift . social.png  (then resize to 1280x640: sips -z 640 1280 social.png)
 import AppKit
 
@@ -45,7 +45,7 @@ func text(_ s: String, _ font: NSFont, _ color: NSColor, at p: NSPoint) {
 }
 let ivory = NSColor(red: 1, green: 0.94, blue: 0.86, alpha: 1)
 let orange = NSColor(red: 1, green: 0.55, blue: 0.12, alpha: 1)
-text("OmniBar", .systemFont(ofSize: 92, weight: .heavy), .white, at: NSPoint(x: 282, y: 418))
+text("Groundbar", .systemFont(ofSize: 92, weight: .heavy), .white, at: NSPoint(x: 282, y: 418))
 text("A Windows-style taskbar for macOS", .systemFont(ofSize: 34, weight: .medium), ivory.withAlphaComponent(0.85), at: NSPoint(x: 86, y: 300))
 
 let features = ["Start menu with app & file search", "Per-app document list", "Recent files & jump lists",

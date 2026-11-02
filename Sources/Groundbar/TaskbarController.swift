@@ -8,7 +8,7 @@ final class BarPanel: NSPanel {
     override var canBecomeMain: Bool { false }
 }
 
-/// Flyouts (Start, calendar, quick settings) take key focus without activating OmniBar.
+/// Flyouts (Start, calendar, quick settings) take key focus without activating Groundbar.
 final class FlyoutPanel: NSPanel {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }

@@ -1,7 +1,7 @@
-// Builds the README demo GIF from OmniBar's own --snapshot renders (no screen recording involved).
+// Builds the README demo GIF from Groundbar's own --snapshot renders (no screen recording involved).
 // Usage: swift scripts/demo-gif.swift <input folder> <output.gif>
 //
-// The input folder holds @2x PNGs rendered with OMNIBAR_DEMO=1 (sample apps and files) in English:
+// The input folder holds @2x PNGs rendered with GROUNDBAR_DEMO=1 (sample apps and files) in English:
 //   bar-dark.png bar-halloween.png bar-christmas.png bar-santa.png (bar layer renders, sleigh-free for Santa)
 //   sleigh.png (the sleigh cropped from a Santa render), start.png preview.png btc.png quick.png
 import AppKit
@@ -105,7 +105,7 @@ func reveal(_ caption: String, _ image: NSImage, x: CGFloat, holdFor seconds: Do
     hold(frame(bar: "dark", caption: caption, panels: [Panel(image: image, x: x, progress: 1)]), seconds)
 }
 
-hold(frame(bar: "dark", caption: "OmniBar · a Windows-style taskbar for macOS"), 1.8)
+hold(frame(bar: "dark", caption: "Groundbar · a Windows-style taskbar for macOS"), 1.8)
 reveal("Start menu: recent apps, files, search", start, x: (W - size(start).width) / 2, holdFor: 2.6)
 reveal("Every open document, one click away", preview, x: W * 0.44, holdFor: 2.4)
 reveal("Bitcoin widget", btc, x: 6, holdFor: 2.0)

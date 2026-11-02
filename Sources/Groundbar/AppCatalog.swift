@@ -17,9 +17,9 @@ final class AppCatalog: ObservableObject {
     @Published private(set) var recentApps: [AppEntry] = []
     private var icons: [String: NSImage] = [:]
 
-    /// Bundle ids (or paths) of apps brought to the front in OmniBar, newest first.
+    /// Bundle ids (or paths) of apps brought to the front in Groundbar, newest first.
     private var used: [String]
-    /// Apps Spotlight saw launched in the last 30 days, to fill the list before OmniBar has its own history.
+    /// Apps Spotlight saw launched in the last 30 days, to fill the list before Groundbar has its own history.
     private var spotlight: [String] = []
     private var spotlightQuery: NSMetadataQuery?
     private var observer: NSObjectProtocol?

@@ -118,7 +118,7 @@ struct PreviewView: View {
                         Image(nsImage: model.icon).resizable().frame(width: 16, height: 16)
                         Text(model.name).font(.system(size: 12, weight: .semibold))
                     }
-                    Text("OmniBar needs the Accessibility permission to list windows.")
+                    Text("Groundbar needs the Accessibility permission to list windows.")
                         .font(.system(size: 11)).foregroundStyle(f.secondary).fixedSize(horizontal: false, vertical: true)
                     Button("Open Accessibility Settings") {
                         TaskbarController.shared.hidePreview()

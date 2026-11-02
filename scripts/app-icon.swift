@@ -1,4 +1,4 @@
-// Draws OmniBar's 1024x1024 app icon: the Omega coin on a night-blue rounded square (macOS icon grid).
+// Draws Groundbar's 1024x1024 app icon: the Omega coin on a night-blue rounded square (macOS icon grid).
 // Usage: swift scripts/app-icon.swift <coin image> <output.png> [x y size]
 //   x y size: square crop of the coin in the source image, in pixels from the top-left
 //   (defaults match the original artwork, a 2000x2000 image).

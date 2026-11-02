@@ -264,6 +264,6 @@ struct BarMenu: View {
         Button("Setup & Permissions…") { WelcomeWindow.show() }
         Button("Settings…") { SettingsWindow.show() }
         Divider()
-        Button("Quit OmniBar") { NSApp.terminate(nil) }
+        Button("Quit Groundbar") { NSApp.terminate(nil) }
     }
 }

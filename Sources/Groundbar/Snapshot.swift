@@ -1,6 +1,6 @@
 import AppKit
 
-/// Debug aid: `OmniBar --snapshot <dir>` writes PNGs of the bar and flyouts, then quits.
+/// Debug aid: `Groundbar --snapshot <dir>` writes PNGs of the bar and flyouts, then quits.
 @MainActor
 enum Snapshot {
     static func run(to dir: String) {
@@ -15,8 +15,8 @@ enum Snapshot {
             ("settings", { WelcomeWindow.close(); c.updater.check(); SettingsWindow.show() }),
             ("preview", { c.closeFlyout(); c.showDemoPreview() }),
         ]
-        // OMNIBAR_SNAPSHOT_STEPS=bar,start limits the run to those steps.
-        let only = ProcessInfo.processInfo.environment["OMNIBAR_SNAPSHOT_STEPS"].map { Set($0.split(separator: ",").map(String.init)) }
+        // GROUNDBAR_SNAPSHOT_STEPS=bar,start limits the run to those steps.
+        let only = ProcessInfo.processInfo.environment["GROUNDBAR_SNAPSHOT_STEPS"].map { Set($0.split(separator: ",").map(String.init)) }
         let steps = only.map { o in allSteps.filter { o.contains($0.0) } } ?? allSteps
         func step(_ i: Int) {
             guard i < steps.count else { NSApp.terminate(nil); return }
@@ -65,9 +65,9 @@ extension TaskbarController {
     }
 }
 
-/// `OMNIBAR_DEMO=1`: sample apps and files instead of the user's own, for README screenshots and the demo GIF.
+/// `GROUNDBAR_DEMO=1`: sample apps and files instead of the user's own, for README screenshots and the demo GIF.
 enum Demo {
-    static let active = ProcessInfo.processInfo.environment["OMNIBAR_DEMO"] == "1"
+    static let active = ProcessInfo.processInfo.environment["GROUNDBAR_DEMO"] == "1"
     static let userName = "Alex Appleseed"
     static let pins = ["com.apple.finder", "com.apple.Safari", "com.apple.mail", "com.apple.iCal", "com.apple.Notes",
                        "com.apple.Music", "com.apple.Photos", "com.apple.systempreferences"]
