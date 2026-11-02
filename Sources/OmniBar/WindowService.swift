@@ -21,7 +21,6 @@ enum WindowService {
 
     /// Apps already asked to build their accessibility tree (done once per process).
     private static var awakened = Set<pid_t>()
-    private static var lastHasWindows: [pid_t: Bool] = [:]
 
     static func axWindows(pid: pid_t) -> [AXUIElement] {
         let app = AXUIElementCreateApplication(pid)
@@ -53,30 +52,7 @@ enum WindowService {
         let windows = axWindows(pid: app.processIdentifier)
         let documents = windows.compactMap { string($0, kAXDocumentAttribute).flatMap { URL(string: $0) } }.filter(\.isFileURL)
         onDocuments?(app, documents)
-        let result = !windows.isEmpty
-        if lastHasWindows[app.processIdentifier] != result {
-            lastHasWindows[app.processIdentifier] = result
-            Log.write("hasWindows(\(app.localizedName ?? "?")) = \(result)")
-            logAX(pid: app.processIdentifier, name: app.localizedName ?? "?")
-        }
-        return result
-    }
-
-    /// Diagnostics for apps whose windows Accessibility does not report.
-    static func logAX(pid: pid_t, name: String) {
-        let app = AXUIElementCreateApplication(pid)
-        var value: CFTypeRef?
-        let error = AXUIElementCopyAttributeValue(app, kAXWindowsAttribute as CFString, &value)
-        let raw = value as? [AXUIElement] ?? []
-        let details = raw.map { "[\(string($0, kAXRoleAttribute) ?? "-")/\(string($0, kAXSubroleAttribute) ?? "-") \"\(string($0, kAXTitleAttribute) ?? "")\" min=\(bool($0, kAXMinimizedAttribute).map { "\($0)" } ?? "-")]" }
-        Log.write("ax(\(name)): error=\(error.rawValue) raw=\(raw.count) \(details.joined(separator: " "))")
-        let cg = (CGWindowListCopyWindowInfo([.optionAll, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? [])
-            .filter { ($0[kCGWindowOwnerPID as String] as? pid_t) == pid && ($0[kCGWindowLayer as String] as? Int) == 0 }
-            .map { w -> String in
-                let b = w[kCGWindowBounds as String] as? [String: Any] ?? [:]
-                return "[\"\(w[kCGWindowName as String] as? String ?? "nil")\" \(b["Width"] ?? 0)x\(b["Height"] ?? 0) on=\(w[kCGWindowIsOnscreen as String] as? Bool ?? false) a=\(w[kCGWindowAlpha as String] ?? 0)]"
-            }
-        Log.write("cg(\(name)): \(cg.count) \(cg.joined(separator: " "))")
+        return !windows.isEmpty
     }
 
     static func attribute(_ el: AXUIElement, _ name: String) -> CFTypeRef? {
@@ -166,17 +142,12 @@ enum WindowService {
             }
         }
 
-        Log.write("windows(\(app.localizedName ?? "?")): ax=0 sc=\(captured.count) axTrusted=\(AXIsProcessTrusted()) screen=\(CGPreflightScreenCaptureAccess())")
         if ax.isEmpty {
-            logAX(pid: pid, name: app.localizedName ?? "?")
-            Log.write("sc(\(app.localizedName ?? "?")): " + captured.map { "[\($0.title ?? "nil") \(Int($0.frame.width))x\(Int($0.frame.height)) onScreen=\($0.isOnScreen)]" }.joined(separator: " "))
             return captured.compactMap { w in
                 guard let title = w.title, !title.isEmpty else { return nil }
                 return AppWindow(id: "sc\(w.windowID)", title: title, frame: w.frame, scWindow: w, document: nil, minimized: !w.isOnScreen)
             }
         }
-
-        Log.write("windows(\(app.localizedName ?? "?")): ax=\(ax.count) sc=\(captured.count) axTrusted=\(AXIsProcessTrusted()) screen=\(CGPreflightScreenCaptureAccess())")
 
         var unused = captured
         return ax.enumerated().map { i, w in

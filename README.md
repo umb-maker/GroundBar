@@ -59,6 +59,19 @@ Grant them in **System Settings › Privacy & Security**.
 
 With ad-hoc signing, macOS may ask for the permissions again after every rebuild. To avoid that, sign with a stable identity: set `OMNIBAR_SIGN_IDENTITY`, or create `scripts/signing.local` containing `OMNIBAR_SIGN_IDENTITY="Your identity"`.
 
+## Privacy & security
+
+- **No telemetry, no accounts.** The only network request goes to the public CoinGecko API over HTTPS, for the Bitcoin price; it carries no information about you.
+- **Permissions are used locally only.** Accessibility lists, raises and closes windows and reads which document each window shows; Screen Recording provides window titles and screenshots. Nothing leaves your Mac.
+- **What OmniBar stores on your Mac:**
+  - settings and the lists of recent apps and recent documents (file paths), in `~/Library/Preferences/app.omnibar.OmniBar.plist`;
+  - screenshots, in the folder macOS uses for screenshots;
+  - a small diagnostic log, `~/Library/Logs/OmniBar.log`: start-up and errors only, never window titles or file names, capped at 1 MB.
+- **Commands it runs:** `screencapture` for screenshots, `pmset displaysleepnow` to lock the screen, System Events for Sleep, Restart, Shut Down and Log Out, and `defaults write com.apple.dock autohide` + `killall Dock` only when you choose *Automatically Hide the Dock*.
+- **No third-party dependencies**, and the source code is open.
+- **Verify your download.** The app is not notarised by Apple, so each release lists the SHA-256 checksum of `OmniBar.zip`. Compare it with `shasum -a 256 OmniBar.zip`.
+- **Remove everything:** quit OmniBar, delete the app, then run `defaults delete app.omnibar.OmniBar` and delete `~/Library/Logs/OmniBar*.log`.
+
 ## Known limitations
 
 - macOS doesn't let an app reserve space at the edge of the screen, so maximised windows can extend under the bar. Hiding the Dock automatically helps (right-click the bar › *Automatically Hide the Dock*).
@@ -66,11 +79,11 @@ With ad-hoc signing, macOS may ask for the permissions again after every rebuild
 - Only windows on the current Space are listed.
 - Other apps' menu bar icons don't appear in the tray.
 - The bar is shown on the main display only.
+- To read the windows of some apps (e.g. Microsoft Office), OmniBar turns on their accessibility interface; in rare cases this can slow down window animations in those apps.
 
 ## Development
 
 - `.build/debug/OmniBar --snapshot <folder>` saves PNGs of the bar and its panels, then quits.
-- Diagnostic logs go to `~/Library/Logs/OmniBar.log`.
 - `scripts/social-preview.swift` renders the repository's social preview image.
 - Only public macOS APIs are used: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon (global hotkeys) and ServiceManagement.
 

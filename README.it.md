@@ -59,6 +59,19 @@ Si concedono in **Impostazioni di Sistema › Privacy e sicurezza**.
 
 Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. Per evitarlo, firma l'app con un'identità stabile: imposta `OMNIBAR_SIGN_IDENTITY` oppure crea `scripts/signing.local` con `OMNIBAR_SIGN_IDENTITY="Nome identità"`.
 
+## Privacy e sicurezza
+
+- **Nessuna telemetria, nessun account.** L'unica connessione di rete va all'API pubblica di CoinGecko, in HTTPS, per il prezzo del Bitcoin, e non contiene informazioni su di te.
+- **I permessi sono usati solo in locale.** Accessibilità serve a elencare, portare in primo piano e chiudere le finestre e a sapere quale documento mostra ciascuna; Registrazione schermo serve per i titoli delle finestre e gli screenshot. Niente esce dal tuo Mac.
+- **Cosa salva OmniBar sul tuo Mac:**
+  - impostazioni ed elenchi di app e documenti recenti (percorsi dei file), in `~/Library/Preferences/app.omnibar.OmniBar.plist`;
+  - gli screenshot, nella cartella che macOS usa per gli screenshot;
+  - un piccolo log diagnostico, `~/Library/Logs/OmniBar.log`: solo avvio ed errori, mai titoli di finestre o nomi di file, al massimo 1 MB.
+- **Comandi che esegue:** `screencapture` per gli screenshot, `pmset displaysleepnow` per bloccare lo schermo, System Events per Sospendi, Riavvia, Arresta e Logout, e `defaults write com.apple.dock autohide` + `killall Dock` solo se scegli *Nascondi automaticamente il Dock*.
+- **Nessuna dipendenza di terze parti**, e il codice è aperto.
+- **Verifica il download.** L'app non è notarizzata da Apple, quindi ogni Release riporta l'impronta SHA-256 di `OmniBar.zip`. Confrontala con `shasum -a 256 OmniBar.zip`.
+- **Per rimuovere tutto:** chiudi OmniBar, cancella l'app, poi esegui `defaults delete app.omnibar.OmniBar` e cancella `~/Library/Logs/OmniBar*.log`.
+
 ## Limiti noti
 
 - macOS non permette a un'app di riservare spazio sul bordo dello schermo, quindi le finestre ingrandite possono finire sotto la barra. Conviene nascondere il Dock in automatico (clic destro sulla barra › *Nascondi automaticamente il Dock*).
@@ -66,11 +79,11 @@ Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. 
 - Vengono elencate solo le finestre della scrivania (Spazio) corrente.
 - Le icone della barra dei menu di altre app non compaiono nella tray.
 - La barra compare solo sullo schermo principale.
+- Per leggere le finestre di alcune app (per esempio Microsoft Office), OmniBar attiva la loro interfaccia di accessibilità; in rari casi questo può rallentare le animazioni delle finestre di quelle app.
 
 ## Sviluppo
 
 - `.build/debug/OmniBar --snapshot <cartella>` salva in PNG la barra e i pannelli, poi esce.
-- I log diagnostici vanno in `~/Library/Logs/OmniBar.log`.
 - Il codice usa solo API pubbliche di macOS: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon per le scorciatoie globali, ServiceManagement.
 
 OmniBar è ispirata a barre delle applicazioni come uBar e a quella di Windows 11, ma non ne contiene codice.
