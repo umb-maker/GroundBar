@@ -84,7 +84,7 @@ With ad-hoc signing, macOS may ask for the permissions again after every rebuild
 ## Development
 
 - `.build/debug/OmniBar --snapshot <folder>` saves PNGs of the bar and its panels, then quits.
-- `scripts/social-preview.swift` renders the repository's social preview image.
+- `scripts/social-preview.swift` renders the repository's social preview image; `scripts/app-icon.swift` renders the app icon (then build `Resources/AppIcon.icns` with `sips` and `iconutil`).
 - Only public macOS APIs are used: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon (global hotkeys) and ServiceManagement.
 
 

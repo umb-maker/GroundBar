@@ -24,7 +24,7 @@ APP=build/OmniBar.app
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/OmniBar"
-cp Resources/StartIcon.png "$APP/Contents/Resources/"
+cp Resources/StartIcon.png Resources/AppIcon.icns "$APP/Contents/Resources/"
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -33,6 +33,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 <dict>
   <key>CFBundleDevelopmentRegion</key><string>en</string>
   <key>CFBundleLocalizations</key><array><string>en</string><string>it</string></array>
+  <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundleIdentifier</key><string>app.omnibar.OmniBar</string>
   <key>CFBundleName</key><string>OmniBar</string>
   <key>CFBundleExecutable</key><string>OmniBar</string>
