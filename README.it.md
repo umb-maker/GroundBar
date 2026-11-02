@@ -49,7 +49,7 @@ open build/OmniBar.app
 
 ## Permessi
 
-Si concedono in **Impostazioni di Sistema › Privacy e sicurezza**.
+Al primo avvio una finestra di benvenuto spiega ogni permesso, apre le impostazioni giuste e mostra quando è stato concesso. Si riapre quando vuoi dal clic destro sulla barra › *Configurazione e permessi…*. I permessi si trovano in **Impostazioni di Sistema › Privacy e sicurezza**.
 
 | Permesso | A cosa serve |
 |---|---|

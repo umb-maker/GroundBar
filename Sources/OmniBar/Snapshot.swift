@@ -11,6 +11,7 @@ enum Snapshot {
             ("calendar", { c.closeFlyout(); c.toggleFlyout("calendar", anchor: .right(.greatestFiniteMagnitude), size: CGSize(width: 340, height: 440)) { CalendarFlyout() } }),
             ("quick", { c.closeFlyout(); c.toggleFlyout("quick", anchor: .right(.greatestFiniteMagnitude), size: CGSize(width: 360, height: 220)) { QuickSettingsView(status: c.status, model: c.model) } }),
             ("btc", { c.closeFlyout(); c.toggleFlyout("btc", anchor: .left(8), size: CGSize(width: 380, height: 340)) { CryptoFlyout(ticker: c.crypto) } }),
+            ("welcome", { c.closeFlyout(); c.hidePreview(); WelcomeWindow.show() }),
             ("preview", { c.closeFlyout(); c.showDemoPreview() }),
         ]
         func step(_ i: Int) {
@@ -20,6 +21,7 @@ enum Snapshot {
                 let windows = NSApp.windows.filter { $0.isVisible && $0.frame.width > 0 }
                 let target = steps[i].0 == "bar" ? windows.first { $0 is BarPanel && $0.frame.height == TaskbarController.barHeight }
                     : steps[i].0 == "preview" ? windows.first { $0 is BarPanel && $0.frame.height != TaskbarController.barHeight }
+                    : steps[i].0 == "welcome" ? WelcomeWindow.window
                     : windows.first { $0 is FlyoutPanel }
                 if let view = target?.contentView, let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
                     view.cacheDisplay(in: view.bounds, to: rep)

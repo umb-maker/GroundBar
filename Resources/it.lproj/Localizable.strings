@@ -25,8 +25,7 @@
 "Center icons" = "Icone al centro";
 "Open at Login" = "Avvia con il Mac";
 "Automatically Hide the Dock" = "Nascondi automaticamente il Dock";
-"Accessibility Permission…" = "Permessi Accessibilità…";
-"Screen Recording Permission…" = "Permessi Registrazione schermo…";
+"Setup & Permissions…" = "Configurazione e permessi…";
 "Quit OmniBar" = "Esci da OmniBar";
 
 /* Start menu */
@@ -79,3 +78,19 @@
 "Click to open the screenshot" = "Clic per aprire lo screenshot";
 /* Used in the file name: "Screenshot 2026-11-02 at 18.05.12.png" */
 "at" = "alle";
+
+/* Welcome window */
+"Welcome to OmniBar" = "Benvenuto in OmniBar";
+"A Windows-style taskbar for your Mac. To list your windows and documents, OmniBar needs two macOS permissions." = "Una barra delle applicazioni in stile Windows per il tuo Mac. Per elencare finestre e documenti, OmniBar ha bisogno di due permessi di macOS.";
+"Accessibility" = "Accessibilità";
+"Lists your open windows and documents, brings them to the front and closes them." = "Elenca le finestre e i documenti aperti, li porta in primo piano e li chiude.";
+"Screen Recording" = "Registrazione schermo";
+"Reads window titles and takes the screenshots you ask for." = "Legge i titoli delle finestre e fa gli screenshot che richiedi.";
+"After allowing Screen Recording, macOS may ask you to quit and reopen OmniBar." = "Dopo aver consentito la Registrazione schermo, macOS potrebbe chiederti di chiudere e riaprire OmniBar.";
+"The Dock can cover the bar: hide it automatically." = "Il Dock può coprire la barra: nascondilo automaticamente.";
+"Hide the Dock" = "Nascondi il Dock";
+"Nothing leaves your Mac: OmniBar only fetches the Bitcoin price from CoinGecko." = "Niente esce dal tuo Mac: OmniBar scarica solo il prezzo del Bitcoin da CoinGecko.";
+"Allow…" = "Consenti…";
+"Allowed" = "Attivo";
+"Get Started" = "Inizia";
+"Later" = "Più tardi";

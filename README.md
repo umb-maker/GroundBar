@@ -49,7 +49,7 @@ open build/OmniBar.app
 
 ## Permissions
 
-Grant them in **System Settings › Privacy & Security**.
+On first launch, a welcome window explains each permission, opens the right settings pane and shows when it is granted. Reopen it any time from the bar's right-click menu › *Setup & Permissions…*. The permissions live in **System Settings › Privacy & Security**.
 
 | Permission | What it's for |
 |---|---|

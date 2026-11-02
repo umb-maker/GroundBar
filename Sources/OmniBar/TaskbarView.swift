@@ -1,5 +1,4 @@
 import AppKit
-import ServiceManagement
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -257,24 +256,10 @@ struct BarMenu: View {
             ForEach(ThemeMode.allCases) { Text($0.label).tag($0) }
         }
         Toggle("Center icons", isOn: $model.centered)
-        Toggle("Open at Login", isOn: Binding(
-            get: { SMAppService.mainApp.status == .enabled },
-            set: { on in
-                do {
-                    if on { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
-                } catch {
-                    Log.write("login item: \(error.localizedDescription)")
-                }
-            }
-        ))
+        Toggle("Open at Login", isOn: LoginItem.binding)
         Divider()
         Button("Automatically Hide the Dock") { TaskbarController.shared.autoHideDock() }
-        Button("Accessibility Permission…") {
-            TaskbarController.openSettings("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
-        }
-        Button("Screen Recording Permission…") {
-            TaskbarController.openSettings("x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")
-        }
+        Button("Setup & Permissions…") { WelcomeWindow.show() }
         Divider()
         Button("Quit OmniBar") { NSApp.terminate(nil) }
     }
