@@ -84,6 +84,7 @@ final class FileIndex: ObservableObject {
 
     /// Merges the window history with Spotlight's recent files, newest first.
     private func rebuild() {
+        if Demo.active { recent = Demo.files; return }
         let fm = FileManager.default
         var seen = Set<String>()
         var merged: [FileEntry] = []

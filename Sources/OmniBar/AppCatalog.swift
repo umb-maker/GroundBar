@@ -86,7 +86,7 @@ final class AppCatalog: ObservableObject {
         let own = Bundle.main.bundleIdentifier
         var seen = Set<String>()
         var list: [AppEntry] = []
-        for id in used + spotlight where id != own {
+        for id in (Demo.active ? Demo.recentApps : used + spotlight) where id != own {
             guard let entry = entry(forID: id), seen.insert(entry.id).inserted else { continue }
             list.append(entry)
             if list.count >= Self.recentLimit { break }

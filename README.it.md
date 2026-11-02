@@ -6,8 +6,7 @@ Una barra delle applicazioni per macOS in basso sullo schermo, con menu Start, e
 
 Disponibile in **italiano** e **inglese**: OmniBar segue la lingua impostata in macOS.
 
-![OmniBar, tema scuro](docs/images/bar-dark.png)
-![OmniBar, tema Halloween](docs/images/bar-halloween.png)
+![Demo di OmniBar: menu Start, elenco documenti, widget Bitcoin, temi stagionali](docs/images/demo.gif)
 
 ## Funzioni
 
@@ -85,7 +84,8 @@ Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. 
 
 ## Sviluppo
 
-- `.build/debug/OmniBar --snapshot <cartella>` salva in PNG la barra e i pannelli, poi esce.
+- `.build/debug/OmniBar --snapshot <cartella>` salva in PNG la barra e i pannelli, poi esce. `OMNIBAR_DEMO=1` usa app e file d'esempio, `OMNIBAR_SNAPSHOT_STEPS=bar,start` limita i passaggi.
+- `scripts/demo-gif.swift` crea la GIF dimostrativa del README da quelle immagini.
 - Il codice usa solo API pubbliche di macOS: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon per le scorciatoie globali, ServiceManagement.
 
 OmniBar è ispirata a barre delle applicazioni come uBar e a quella di Windows 11, ma non ne contiene codice.

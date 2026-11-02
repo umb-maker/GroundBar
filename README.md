@@ -4,8 +4,7 @@
 
 A Windows-style taskbar for macOS: a bottom bar with a Start menu of recent apps, a list of each app's open documents, recent files, a Bitcoin widget and themes. Native Swift/SwiftUI + AppKit, public APIs only, no third-party dependencies.
 
-![OmniBar, dark theme](docs/images/bar-dark.png)
-![OmniBar, Halloween theme](docs/images/bar-halloween.png)
+![OmniBar demo: Start menu, document list, Bitcoin widget, seasonal themes](docs/images/demo.gif)
 
 Available in **English** and **Italian**: OmniBar follows the language set in macOS.
 
@@ -85,7 +84,8 @@ With ad-hoc signing, macOS may ask for the permissions again after every rebuild
 
 ## Development
 
-- `.build/debug/OmniBar --snapshot <folder>` saves PNGs of the bar and its panels, then quits.
+- `.build/debug/OmniBar --snapshot <folder>` saves PNGs of the bar and its panels, then quits. `OMNIBAR_DEMO=1` swaps in sample apps and files, `OMNIBAR_SNAPSHOT_STEPS=bar,start` limits the steps.
+- `scripts/demo-gif.swift` builds the README demo GIF from those renders.
 - `scripts/social-preview.swift` renders the repository's social preview image; `scripts/app-icon.swift` renders the app icon (then build `Resources/AppIcon.icns` with `sips` and `iconutil`).
 - Only public macOS APIs are used: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon (global hotkeys) and ServiceManagement.
 

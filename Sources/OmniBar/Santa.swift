@@ -13,8 +13,10 @@ struct SantaDecor: NSViewRepresentable {
         /// One flight takes `flight` seconds and starts again every `cycle` seconds.
         private static let flight: Double = 12
         private static let cycle: Double = 26
-        /// `OMNIBAR_DEBUG_SLEIGH=1` parks the sleigh mid-bar without animating (for `--snapshot` checks).
-        private static let debugParked = ProcessInfo.processInfo.environment["OMNIBAR_DEBUG_SLEIGH"] == "1"
+        /// `OMNIBAR_DEBUG_SLEIGH=<fraction of the bar width>` parks the sleigh there without animating
+        /// (for `--snapshot` checks; `1` means the middle of the bar).
+        private static let debugParked: CGFloat? = ProcessInfo.processInfo.environment["OMNIBAR_DEBUG_SLEIGH"]
+            .flatMap(Double.init).map { $0 >= 1 ? 0.4 : CGFloat($0) }
 
         private var built: CGSize = .zero
 
@@ -48,8 +50,8 @@ struct SantaDecor: NSViewRepresentable {
             let trail = makeTrail(scale: scale)
             root.addSublayer(trail)
 
-            if Self.debugParked {
-                sleigh.position = CGPoint(x: w * 0.4, y: h / 2)
+            if let parked = Self.debugParked {
+                sleigh.position = CGPoint(x: w * parked, y: h / 2)
                 return
             }
             // Parked off-screen between flights; the animation only covers the crossing.

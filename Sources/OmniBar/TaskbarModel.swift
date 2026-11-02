@@ -107,7 +107,7 @@ final class TaskbarModel: ObservableObject {
 
         var result: [TaskItem] = []
         var used = Set<pid_t>()
-        for id in pinnedIDs {
+        for id in Demo.active ? Demo.pins : pinnedIDs {
             let app = running.first { Self.key(for: $0) == id }
             if let app { used.insert(app.processIdentifier) }
             let url = app?.bundleURL ?? ws.urlForApplication(withBundleIdentifier: id)
@@ -116,7 +116,7 @@ final class TaskbarModel: ObservableObject {
             result.append(makeItem(id: id, url: url, app: app, pinned: true, activePID: activePID))
         }
         // Like Windows, an app that is not pinned only has a button while it has windows.
-        for app in running where !used.contains(app.processIdentifier) && WindowService.hasWindows(app) {
+        for app in running where !Demo.active && !used.contains(app.processIdentifier) && WindowService.hasWindows(app) {
             result.append(makeItem(id: Self.key(for: app), url: app.bundleURL, app: app, pinned: false, activePID: activePID))
         }
         if result != items { items = result }

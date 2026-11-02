@@ -5,7 +5,7 @@ import AppKit
 enum Snapshot {
     static func run(to dir: String) {
         let c = TaskbarController.shared
-        let steps: [(String, () -> Void)] = [
+        let allSteps: [(String, () -> Void)] = [
             ("bar", {}),
             ("start", { c.toggleStart() }),
             ("calendar", { c.closeFlyout(); c.toggleFlyout("calendar", anchor: .right(.greatestFiniteMagnitude), size: CGSize(width: 340, height: 440)) { CalendarFlyout() } }),
@@ -15,6 +15,9 @@ enum Snapshot {
             ("settings", { WelcomeWindow.close(); c.updater.check(); SettingsWindow.show() }),
             ("preview", { c.closeFlyout(); c.showDemoPreview() }),
         ]
+        // OMNIBAR_SNAPSHOT_STEPS=bar,start limits the run to those steps.
+        let only = ProcessInfo.processInfo.environment["OMNIBAR_SNAPSHOT_STEPS"].map { Set($0.split(separator: ",").map(String.init)) }
+        let steps = only.map { o in allSteps.filter { o.contains($0.0) } } ?? allSteps
         func step(_ i: Int) {
             guard i < steps.count else { NSApp.terminate(nil); return }
             steps[i].1()
@@ -59,5 +62,26 @@ extension TaskbarController {
         let icon = NSWorkspace.shared.icon(forFile: "/System/Applications/TextEdit.app")
         preview.loadStatic(docs, name: "Microsoft Word", icon: icon)
         showPreviewPanel(anchor: CGRect(x: 700, y: 0, width: 44, height: 40))
+    }
+}
+
+/// `OMNIBAR_DEMO=1`: sample apps and files instead of the user's own, for README screenshots and the demo GIF.
+enum Demo {
+    static let active = ProcessInfo.processInfo.environment["OMNIBAR_DEMO"] == "1"
+    static let userName = "Alex Appleseed"
+    static let pins = ["com.apple.finder", "com.apple.Safari", "com.apple.mail", "com.apple.iCal", "com.apple.Notes",
+                       "com.apple.Music", "com.apple.Photos", "com.apple.systempreferences"]
+    static let recentApps = ["com.apple.Safari", "com.apple.mail", "com.apple.Notes", "com.apple.iCal", "com.apple.Photos",
+                             "com.apple.Music", "com.apple.MobileSMS", "com.apple.Maps", "com.apple.reminders",
+                             "com.apple.AppStore", "com.apple.finder", "com.apple.systempreferences", "com.apple.Preview",
+                             "com.apple.TextEdit", "com.apple.calculator", "com.apple.Terminal", "com.apple.ActivityMonitor",
+                             "com.apple.FaceTime"]
+    static var files: [FileEntry] {
+        let names = ["Quarterly report.docx", "Budget 2026.xlsx", "Signed contract.pdf", "Holiday photos.jpg",
+                     "Meeting minutes.docx", "Product roadmap.key"]
+        return names.enumerated().map { i, n in
+            FileEntry(url: URL(fileURLWithPath: "/Users/Shared/Demo/\(n)"),
+                      lastUsed: Date().addingTimeInterval(-Double([180, 1500, 4000, 9000, 30000, 90000][i])), opener: nil)
+        }
     }
 }
