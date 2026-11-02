@@ -9,7 +9,7 @@ Una barra delle applicazioni per macOS in basso sullo schermo, con menu Start, e
 
 ## Funzioni
 
-- **Menu Start**: app aggiunte, *Consigliati* con i file aperti di recente, *Tutte le app*, ricerca di app **e file** (Invio apre, ↑↓ per scegliere), menu di arresto.
+- **Menu Start**: app usate di recente, *Consigliati* con i file aperti di recente, *Tutte le app*, ricerca di app **e file** (Invio apre, ↑↓ per scegliere), menu di arresto.
 - **App fissate e aperte** in un'unica barra, con indicatore dell'app attiva. Le app non fissate compaiono solo finché hanno finestre aperte.
 - **Elenco dei documenti per app**: passando sopra un'icona o cliccandola si vedono tutti i documenti aperti, anche quelli ridotti a icona. Un clic porta in primo piano il documento scelto, la ✕ lo chiude.
 - **Documenti recenti** nel clic destro su ogni app (Word, Excel, lettore PDF…).
@@ -18,7 +18,7 @@ Una barra delle applicazioni per macOS in basso sullo schermo, con menu Start, e
 - **Widget Bitcoin**: prezzo in euro, variazione e grafico delle 24 ore. Con un clic si apre un grafico da 24 ore a 1 anno (dati CoinGecko).
 - **Impostazioni rapide**: rete, volume, batteria, tema.
 - **Mostra desktop**, sul bordo destro della barra.
-- **Temi**: Sistema, Chiaro, Scuro, **Halloween** 🎃.
+- **Temi**: Sistema, Chiaro, Scuro, **Halloween** 🎃, **Natale** 🎄 (neve che scende e lucine) e **Babbo Natale** 🎅 (cielo notturno con la slitta che attraversa la barra).
 - **Scorciatoie**: ⌃⌥1…9 apre l'app n-esima, ⌃⌥Spazio apre Start, ⌃⌥D mostra il desktop.
 - **Avvio automatico** con il Mac, da attivare dal menu del clic destro sulla barra.
 

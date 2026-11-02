@@ -16,6 +16,8 @@ struct TaskbarView: View {
             f.barTint
             Rectangle().fill(f.stroke).frame(height: 1).frame(maxHeight: .infinity, alignment: .top)
             if model.theme == .halloween { HalloweenDecor() }
+            if model.theme == .christmas { ChristmasDecor() }
+            if model.theme == .santa { SantaDecor() }
             Color.clear.contentShape(Rectangle()).contextMenu { BarMenu(model: model) }
 
             HStack(spacing: 4) {

@@ -27,7 +27,6 @@ struct StartMenuView: View {
     private var hits: [Hit] {
         catalog.search(query).prefix(6).map(Hit.app) + files.searchResults.map(Hit.file)
     }
-    private var pinned: [AppEntry] { model.startPinned.compactMap { catalog.entry(forID: $0) } }
 
     var body: some View {
         let f = Fluent(scheme)
@@ -101,13 +100,13 @@ struct StartMenuView: View {
         .padding(.bottom, 8)
     }
 
-    /// Pinned apps, then "Consigliati" (recent files), as in Windows 11.
+    /// Recently used apps, then "Consigliati" (recent files), as in Windows 11.
     private func home(_ f: Fluent) -> some View {
         ScrollView {
             VStack(spacing: 0) {
-                sectionHeader("Aggiunte", button: "Tutte le app  ›") { showAll = true }
+                sectionHeader("App recenti", button: "Tutte le app  ›") { showAll = true }
                 LazyVGrid(columns: Array(repeating: GridItem(.fixed(88), spacing: 4), count: 6), spacing: 6) {
-                    ForEach(pinned) { entry in
+                    ForEach(catalog.recentApps) { entry in
                         Button { open(entry) } label: {
                             VStack(spacing: 6) {
                                 Image(nsImage: catalog.icon(entry)).resizable().frame(width: 36, height: 36)
@@ -117,7 +116,7 @@ struct StartMenuView: View {
                             .frame(width: 88, height: 76)
                         }
                         .buttonStyle(FluentButtonStyle())
-                        .contextMenu { entryMenu(entry, inStart: true) }
+                        .contextMenu { entryMenu(entry) }
                     }
                 }
                 .padding(.horizontal, 32)
@@ -239,14 +238,13 @@ struct StartMenuView: View {
             }
         }
         .buttonStyle(FluentButtonStyle(selected: selected))
-        .contextMenu { entryMenu(entry, inStart: model.startPinned.contains(entry.bundleID ?? entry.url.path)) }
+        .contextMenu { entryMenu(entry) }
     }
 
     @ViewBuilder
-    private func entryMenu(_ entry: AppEntry, inStart: Bool) -> some View {
+    private func entryMenu(_ entry: AppEntry) -> some View {
         Button("Apri") { open(entry) }
         Divider()
-        Button(inStart ? "Rimuovi da Start" : "Aggiungi a Start") { model.setStartPinned(entry, !inStart) }
         if !model.isPinnedToBar(entry) {
             Button("Aggiungi alla barra delle applicazioni") { model.pinToBar(entry) }
         }

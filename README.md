@@ -2,7 +2,7 @@
 
 **English** · [Italiano](README.it.md)
 
-A Windows-style taskbar for macOS: a bottom bar with a Start menu, a list of each app's open documents, recent files, a Bitcoin widget and themes. Native Swift/SwiftUI + AppKit, public APIs only, no third-party dependencies.
+A Windows-style taskbar for macOS: a bottom bar with a Start menu of recent apps, a list of each app's open documents, recent files, a Bitcoin widget and themes. Native Swift/SwiftUI + AppKit, public APIs only, no third-party dependencies.
 
 ![OmniBar, dark theme](docs/images/bar-dark.png)
 ![OmniBar, Halloween theme](docs/images/bar-halloween.png)
@@ -11,7 +11,7 @@ A Windows-style taskbar for macOS: a bottom bar with a Start menu, a list of eac
 
 ## Features
 
-- **Start menu**: pinned apps, *Recommended* recent files, *All apps*, and search across apps **and files** (Return opens, ↑↓ to select), plus a power menu.
+- **Start menu**: recently used apps, *Recommended* recent files, *All apps*, and search across apps **and files** (Return opens, ↑↓ to select), plus a power menu.
 - **Pinned and running apps** in one bar, with an active-app indicator. Apps that aren't pinned only show up while they have open windows.
 - **Per-app document list**: hover or click an icon to see every open document of that app, minimised ones included. Click one to bring it to the front, or close it with ✕.
 - **Recent documents** (jump lists) in each app's right-click menu, e.g. Word, Excel or a PDF reader.
@@ -20,7 +20,7 @@ A Windows-style taskbar for macOS: a bottom bar with a Start menu, a list of eac
 - **Bitcoin widget**: price in euro, 24-hour change and sparkline. Click it for a chart from 24 hours to 1 year (data from CoinGecko).
 - **Quick settings**: network, volume, battery, theme.
 - **Show desktop** strip on the right edge.
-- **Themes**: System, Light, Dark and **Halloween** 🎃.
+- **Themes**: System, Light, Dark, **Halloween** 🎃, **Christmas** 🎄 (falling snow, twinkling lights) and **Santa** 🎅 (a night sky with Santa's sleigh flying across the bar).
 - **Global shortcuts**: ⌃⌥1…9 opens the n-th app, ⌃⌥Space opens Start, ⌃⌥D shows the desktop.
 - **Launch at login**, from the bar's right-click menu.
 

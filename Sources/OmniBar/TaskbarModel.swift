@@ -26,13 +26,12 @@ final class TaskbarModel: ObservableObject {
     @Published var theme: ThemeMode {
         didSet {
             UserDefaults.standard.set(theme.rawValue, forKey: "theme")
-            Fluent.halloween = theme == .halloween
+            Fluent.theme = theme
         }
     }
     @Published var centered: Bool {
         didSet { UserDefaults.standard.set(centered, forKey: "centered") }
     }
-    @Published private(set) var startPinned: [String]
 
     private var pinnedIDs: [String]
     private var iconCache: [String: NSImage] = [:]
@@ -43,19 +42,13 @@ final class TaskbarModel: ObservableObject {
     private var pollTimer: Timer?
 
     static let defaultPins = ["com.apple.finder", "com.apple.Safari", "com.apple.mail", "com.apple.iCal", "com.apple.systempreferences"]
-    static let defaultStartPins = [
-        "com.apple.Safari", "com.apple.mail", "com.apple.iCal", "com.apple.Notes", "com.apple.Photos", "com.apple.Music",
-        "com.apple.MobileSMS", "com.apple.Maps", "com.apple.reminders", "com.apple.AppStore", "com.apple.systempreferences",
-        "com.apple.Terminal", "com.apple.finder", "com.apple.TextEdit", "com.apple.calculator", "com.apple.ActivityMonitor",
-    ]
 
     init() {
         let d = UserDefaults.standard
         pinnedIDs = d.stringArray(forKey: "pinned") ?? Self.defaultPins
-        startPinned = d.stringArray(forKey: "startPinned") ?? Self.defaultStartPins
         theme = ThemeMode(rawValue: d.string(forKey: "theme") ?? "") ?? .system
         centered = d.object(forKey: "centered") as? Bool ?? true
-        Fluent.halloween = theme == .halloween
+        Fluent.theme = theme
 
         let nc = NSWorkspace.shared.notificationCenter
         let names: [Notification.Name] = [
@@ -165,13 +158,6 @@ final class TaskbarModel: ObservableObject {
     }
 
     func isPinnedToBar(_ entry: AppEntry) -> Bool { pinnedIDs.contains(entry.bundleID ?? entry.url.path) }
-
-    func setStartPinned(_ entry: AppEntry, _ pinned: Bool) {
-        let id = entry.bundleID ?? entry.url.path
-        startPinned.removeAll { $0 == id }
-        if pinned { startPinned.append(id) }
-        UserDefaults.standard.set(startPinned, forKey: "startPinned")
-    }
 
     // MARK: Actions
 

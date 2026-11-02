@@ -10,19 +10,88 @@ struct AppEntry: Identifiable, Hashable {
 /// Installed applications, for the Start menu and its search.
 @MainActor
 final class AppCatalog: ObservableObject {
-    @Published private(set) var apps: [AppEntry] = []
+    @Published private(set) var apps: [AppEntry] = [] {
+        didSet { rebuildRecent() }
+    }
+    /// Recently used apps, newest first, for the Start menu.
+    @Published private(set) var recentApps: [AppEntry] = []
     private var icons: [String: NSImage] = [:]
+
+    /// Bundle ids (or paths) of apps brought to the front in OmniBar, newest first.
+    private var used: [String]
+    /// Apps Spotlight saw launched in the last 30 days, to fill the list before OmniBar has its own history.
+    private var spotlight: [String] = []
+    private var spotlightQuery: NSMetadataQuery?
+    private var observer: NSObjectProtocol?
+
+    static let recentLimit = 18
+    private static let usedKey = "recentApps"
 
     nonisolated private static let roots: [String] = [
         "/Applications", "/Applications/Utilities", "/System/Applications", "/System/Applications/Utilities",
         NSHomeDirectory() + "/Applications",
     ]
 
+    init() {
+        used = UserDefaults.standard.stringArray(forKey: Self.usedKey) ?? []
+        observer = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
+        ) { [weak self] note in
+            guard let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
+            MainActor.assumeIsolated { self?.noteUsed(app) }
+        }
+        loadSpotlight()
+    }
+
     func reload() {
         Task.detached(priority: .utility) {
             let list = Self.scan()
             await MainActor.run { self.apps = list }
         }
+    }
+
+    // MARK: Recent apps
+
+    private func noteUsed(_ app: NSRunningApplication) {
+        guard app.activationPolicy == .regular, app.processIdentifier != getpid(),
+              let id = app.bundleIdentifier ?? app.bundleURL?.path, used.first != id else { return }
+        used.removeAll { $0 == id }
+        used.insert(id, at: 0)
+        used = Array(used.prefix(50))
+        UserDefaults.standard.set(used, forKey: Self.usedKey)
+        rebuildRecent()
+    }
+
+    private func loadSpotlight() {
+        let since = Calendar.current.date(byAdding: .day, value: -30, to: Date())!
+        let q = NSMetadataQuery()
+        q.predicate = NSPredicate(format: "kMDItemContentType == 'com.apple.application-bundle' AND kMDItemLastUsedDate >= %@", since as NSDate)
+        q.searchScopes = [NSMetadataQueryLocalComputerScope]
+        q.sortDescriptors = [NSSortDescriptor(key: NSMetadataItemLastUsedDateKey, ascending: false)]
+        var token: NSObjectProtocol?
+        token = NotificationCenter.default.addObserver(forName: .NSMetadataQueryDidFinishGathering, object: q, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                q.stop()
+                if let token { NotificationCenter.default.removeObserver(token) }
+                self?.spotlight = q.results.compactMap { ($0 as? NSMetadataItem)?.value(forAttribute: "kMDItemCFBundleIdentifier") as? String }
+                self?.spotlightQuery = nil
+                self?.rebuildRecent()
+            }
+        }
+        spotlightQuery = q
+        q.start()
+    }
+
+    private func rebuildRecent() {
+        let own = Bundle.main.bundleIdentifier
+        var seen = Set<String>()
+        var list: [AppEntry] = []
+        for id in used + spotlight where id != own {
+            guard let entry = entry(forID: id), seen.insert(entry.id).inserted else { continue }
+            list.append(entry)
+            if list.count >= Self.recentLimit { break }
+        }
+        if list != recentApps { recentApps = list }
     }
 
     nonisolated static func scan() -> [AppEntry] {

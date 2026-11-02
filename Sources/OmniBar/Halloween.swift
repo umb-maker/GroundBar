@@ -49,16 +49,16 @@ struct HalloweenDecor: NSViewRepresentable {
             root.addSublayer(glow)
 
             for bat in Self.bats {
-                let l = emojiLayer("🦇", size: bat.size, scale: scale)
+                let l = Decor.emoji("🦇", size: bat.size, scale: scale)
                 l.position = CGPoint(x: w * bat.x, y: h / 2)
                 l.opacity = 0.9
                 root.addSublayer(l)
-                l.add(bob(dy: 6, duration: 2.2, phase: bat.phase), forKey: "bob")
-                l.add(sway(dx: 6, duration: 5.5, phase: bat.phase), forKey: "sway")
-                l.add(tilt(duration: 1.6, phase: bat.phase), forKey: "tilt")
+                l.add(Decor.bob(dy: 6, duration: 2.2, phase: bat.phase), forKey: "bob")
+                l.add(Decor.sway(dx: 6, duration: 5.5, phase: bat.phase), forKey: "sway")
+                l.add(Decor.tilt(duration: 1.6, phase: bat.phase), forKey: "tilt")
             }
 
-            let pumpkin = emojiLayer("🎃", size: 18, scale: scale)
+            let pumpkin = Decor.emoji("🎃", size: 18, scale: scale)
             pumpkin.position = CGPoint(x: w * 0.79, y: h / 2)
             pumpkin.shadowColor = p.cgColor
             pumpkin.shadowOpacity = 0.9
@@ -74,46 +74,10 @@ struct HalloweenDecor: NSViewRepresentable {
             pulse.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
             pumpkin.add(pulse, forKey: "pulse")
 
-            let web = emojiLayer("🕸️", size: 16, scale: scale)
+            let web = Decor.emoji("🕸️", size: 16, scale: scale)
             web.position = CGPoint(x: w - 18, y: h - 10)
             web.opacity = 0.45
             root.addSublayer(web)
-        }
-
-        private func emojiLayer(_ emoji: String, size: CGFloat, scale: CGFloat) -> CALayer {
-            let text = NSAttributedString(string: emoji, attributes: [.font: NSFont.systemFont(ofSize: size)])
-            let box = text.size()
-            let image = NSImage(size: box, flipped: false) { _ in text.draw(at: .zero); return true }
-            let l = CALayer()
-            l.bounds = CGRect(origin: .zero, size: box)
-            l.contentsScale = scale
-            l.contents = image.layerContents(forContentsScale: scale)
-            return l
-        }
-
-        private func repeating(_ keyPath: String, from: Double, to: Double, duration: Double, phase: Double) -> CABasicAnimation {
-            let a = CABasicAnimation(keyPath: keyPath)
-            a.fromValue = from
-            a.toValue = to
-            a.duration = duration
-            a.autoreverses = true
-            a.repeatCount = .infinity
-            a.timeOffset = phase * duration
-            a.isAdditive = true
-            a.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            return a
-        }
-
-        private func bob(dy: Double, duration: Double, phase: Double) -> CABasicAnimation {
-            repeating("position.y", from: -dy, to: dy, duration: duration, phase: phase)
-        }
-
-        private func sway(dx: Double, duration: Double, phase: Double) -> CABasicAnimation {
-            repeating("position.x", from: -dx, to: dx, duration: duration, phase: phase)
-        }
-
-        private func tilt(duration: Double, phase: Double) -> CABasicAnimation {
-            repeating("transform.rotation.z", from: -0.14, to: 0.14, duration: duration, phase: phase)
         }
     }
 }
