@@ -89,7 +89,6 @@ With ad-hoc signing, macOS may ask for the permissions again after every rebuild
 - `scripts/social-preview.swift` renders the repository's social preview image; `scripts/app-icon.swift` renders the app icon (then build `Resources/AppIcon.icns` with `sips` and `iconutil`).
 - Only public macOS APIs are used: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon (global hotkeys) and ServiceManagement.
 
-
 ## License
 
 [MIT](LICENSE) © 2026 csvnm

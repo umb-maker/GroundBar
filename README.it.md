@@ -88,8 +88,6 @@ Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. 
 - `scripts/demo-gif.swift` crea la GIF dimostrativa del README da quelle immagini.
 - Il codice usa solo API pubbliche di macOS: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon per le scorciatoie globali, ServiceManagement.
 
-OmniBar è ispirata a barre delle applicazioni come uBar e a quella di Windows 11, ma non ne contiene codice.
-
 ## Licenza
 
 [MIT](LICENSE) © 2026 csvnm
