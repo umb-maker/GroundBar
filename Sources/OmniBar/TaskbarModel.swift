@@ -32,6 +32,15 @@ final class TaskbarModel: ObservableObject {
     @Published var centered: Bool {
         didSet { UserDefaults.standard.set(centered, forKey: "centered") }
     }
+    @Published var showCrypto: Bool {
+        didSet {
+            UserDefaults.standard.set(showCrypto, forKey: "showCrypto")
+            if showCrypto && !oldValue { TaskbarController.shared.crypto.refresh() }
+        }
+    }
+    @Published var showScreenshotButtons: Bool {
+        didSet { UserDefaults.standard.set(showScreenshotButtons, forKey: "showScreenshotButtons") }
+    }
 
     private var pinnedIDs: [String]
     private var iconCache: [String: NSImage] = [:]
@@ -48,6 +57,8 @@ final class TaskbarModel: ObservableObject {
         pinnedIDs = d.stringArray(forKey: "pinned") ?? Self.defaultPins
         theme = ThemeMode(rawValue: d.string(forKey: "theme") ?? "") ?? .system
         centered = d.object(forKey: "centered") as? Bool ?? true
+        showCrypto = d.object(forKey: "showCrypto") as? Bool ?? true
+        showScreenshotButtons = d.object(forKey: "showScreenshotButtons") as? Bool ?? true
         Fluent.theme = theme
 
         let nc = NSWorkspace.shared.notificationCenter

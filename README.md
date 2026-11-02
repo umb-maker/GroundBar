@@ -23,6 +23,8 @@ Available in **English** and **Italian**: OmniBar follows the language set in ma
 - **Themes**: System, Light, Dark, **Halloween** 🎃, **Christmas** 🎄 (falling snow, twinkling lights) and **Santa** 🎅 (a night sky with Santa's sleigh flying across the bar).
 - **Global shortcuts**: ⌃⌥1…9 opens the n-th app, ⌃⌥Space opens Start, ⌃⌥D shows the desktop.
 - **Launch at login**, from the bar's right-click menu.
+- **Settings window**: theme, icon layout, Bitcoin widget and currency (EUR/USD), screenshot buttons, shortcuts, updates.
+- **Update notices**: OmniBar checks GitHub once a day and tells you when a new version is out (it never installs anything by itself).
 
 | Document list | Bitcoin | Quick settings |
 |---|---|---|
@@ -61,7 +63,7 @@ With ad-hoc signing, macOS may ask for the permissions again after every rebuild
 
 ## Privacy & security
 
-- **No telemetry, no accounts.** The only network request goes to the public CoinGecko API over HTTPS, for the Bitcoin price; it carries no information about you.
+- **No telemetry, no accounts.** OmniBar makes two kinds of network request, both over HTTPS and carrying no information about you: the public CoinGecko API for the Bitcoin price (off if you hide the widget), and GitHub's public API once a day to check for a new release (off in Settings › Updates).
 - **Permissions are used locally only.** Accessibility lists, raises and closes windows and reads which document each window shows; Screen Recording provides window titles and screenshots. Nothing leaves your Mac.
 - **What OmniBar stores on your Mac:**
   - settings and the lists of recent apps and recent documents (file paths), in `~/Library/Preferences/app.omnibar.OmniBar.plist`;

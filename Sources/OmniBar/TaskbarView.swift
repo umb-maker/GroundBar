@@ -31,7 +31,7 @@ struct TaskbarView: View {
             .animation(.easeOut(duration: 0.15), value: model.items.map(\.id))
 
             // Widget area on the left, as in Windows 11 (moves to the right when icons are left-aligned).
-            if model.centered {
+            if model.centered && model.showCrypto {
                 HStack {
                     CryptoWidget(ticker: TaskbarController.shared.crypto)
                     Spacer()
@@ -41,12 +41,14 @@ struct TaskbarView: View {
 
             HStack(spacing: 2) {
                 Spacer()
-                if !model.centered { CryptoWidget(ticker: TaskbarController.shared.crypto) }
-                BarIconButton(symbol: "rectangle.dashed", help: "Screenshot of part of the screen") {
-                    ScreenCapture.capture(region: true)
-                }
-                BarIconButton(symbol: "display", help: "Screenshot of the whole screen") {
-                    ScreenCapture.capture(region: false)
+                if !model.centered && model.showCrypto { CryptoWidget(ticker: TaskbarController.shared.crypto) }
+                if model.showScreenshotButtons {
+                    BarIconButton(symbol: "rectangle.dashed", help: "Screenshot of part of the screen") {
+                        ScreenCapture.capture(region: true)
+                    }
+                    BarIconButton(symbol: "display", help: "Screenshot of the whole screen") {
+                        ScreenCapture.capture(region: false)
+                    }
                 }
                 TrayButton(status: status)
                 ShowDesktopStrip(model: model)
@@ -260,6 +262,7 @@ struct BarMenu: View {
         Divider()
         Button("Automatically Hide the Dock") { TaskbarController.shared.autoHideDock() }
         Button("Setup & Permissions…") { WelcomeWindow.show() }
+        Button("Settings…") { SettingsWindow.show() }
         Divider()
         Button("Quit OmniBar") { NSApp.terminate(nil) }
     }

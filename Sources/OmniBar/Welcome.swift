@@ -152,7 +152,7 @@ struct WelcomeView: View {
 
             HStack(alignment: .center, spacing: 12) {
                 Image(systemName: "lock.shield").foregroundStyle(f.secondary)
-                Text("Nothing leaves your Mac: OmniBar only fetches the Bitcoin price from CoinGecko.")
+                Text("Nothing about you leaves your Mac: OmniBar only fetches the Bitcoin price from CoinGecko and checks GitHub for updates.")
                     .font(.system(size: 11)).foregroundStyle(f.secondary).fixedSize(horizontal: false, vertical: true)
                 Spacer()
                 Button(permissions.allGranted ? "Get Started" : "Later") { WelcomeWindow.close() }

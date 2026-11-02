@@ -31,7 +31,8 @@ enum ScreenCapture {
         }
         TaskbarController.shared.showToast(
             title: L("Screenshot saved and copied to the clipboard"),
-            detail: url.lastPathComponent
+            detail: url.lastPathComponent,
+            symbol: "camera.viewfinder"
         ) {
             NSWorkspace.shared.open(url)
         }
@@ -59,13 +60,14 @@ enum ScreenCapture {
 struct ToastView: View {
     let title: String
     let detail: String
+    let symbol: String
     let action: () -> Void
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         let f = Fluent(scheme)
         HStack(spacing: 12) {
-            Image(systemName: "camera.viewfinder").font(.system(size: 20)).foregroundStyle(f.accent)
+            Image(systemName: symbol).font(.system(size: 20)).foregroundStyle(f.accent)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.system(size: 12, weight: .semibold))
                 Text(detail).font(.system(size: 11)).foregroundStyle(f.secondary).lineLimit(1).truncationMode(.middle)
@@ -81,6 +83,5 @@ struct ToastView: View {
             TaskbarController.shared.hideToast()
             action()
         }
-        .help("Click to open the screenshot")
     }
 }

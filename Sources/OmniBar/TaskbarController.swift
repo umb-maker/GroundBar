@@ -25,6 +25,7 @@ final class TaskbarController {
     let catalog = AppCatalog()
     let files = FileIndex()
     let crypto = CryptoTicker()
+    let updater = Updater()
 
     private init() {
         WindowService.onDocuments = { app, documents in
@@ -317,7 +318,7 @@ final class TaskbarController {
     private var toastPanel: BarPanel?
     private var toastTimer: Timer?
 
-    func showToast(title: String, detail: String, action: @escaping () -> Void) {
+    func showToast(title: String, detail: String, symbol: String, action: @escaping () -> Void) {
         hideToast()
         let size = CGSize(width: 340, height: 64)
         let s = screen.frame
@@ -325,12 +326,12 @@ final class TaskbarController {
                          styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
         configure(p)
         p.hasShadow = true
-        p.contentView = NSHostingView(rootView: ToastView(title: title, detail: detail, action: action))
+        p.contentView = NSHostingView(rootView: ToastView(title: title, detail: detail, symbol: symbol, action: action))
         p.alphaValue = 0
         p.orderFrontRegardless()
         NSAnimationContext.runAnimationGroup { $0.duration = 0.15; p.animator().alphaValue = 1 }
         toastPanel = p
-        toastTimer = Timer.scheduledTimer(withTimeInterval: 4, repeats: false) { _ in
+        toastTimer = Timer.scheduledTimer(withTimeInterval: 6, repeats: false) { _ in
             MainActor.assumeIsolated { TaskbarController.shared.hideToast() }
         }
     }

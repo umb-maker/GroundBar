@@ -256,6 +256,11 @@ struct StartMenuView: View {
             Image(systemName: "person.crop.circle.fill").font(.system(size: 26)).foregroundStyle(f.secondary)
             Text(NSFullUserName()).font(.system(size: 12)).foregroundStyle(f.text)
             Spacer()
+            Button { SettingsWindow.show() } label: {
+                Image(systemName: "gearshape").font(.system(size: 15)).foregroundStyle(f.text).frame(width: 36, height: 36)
+            }
+            .buttonStyle(FluentButtonStyle())
+            .help("Settings")
             Menu {
                 Button("Lock Screen") { Power.lock() }
                 Button("Sleep") { Power.run("sleep") }

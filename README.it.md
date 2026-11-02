@@ -23,6 +23,8 @@ Disponibile in **italiano** e **inglese**: OmniBar segue la lingua impostata in 
 - **Temi**: Sistema, Chiaro, Scuro, **Halloween** 🎃, **Natale** 🎄 (neve che scende e lucine) e **Babbo Natale** 🎅 (cielo notturno con la slitta che attraversa la barra).
 - **Scorciatoie**: ⌃⌥1…9 apre l'app n-esima, ⌃⌥Spazio apre Start, ⌃⌥D mostra il desktop.
 - **Avvio automatico** con il Mac, da attivare dal menu del clic destro sulla barra.
+- **Finestra Impostazioni**: tema, disposizione delle icone, widget Bitcoin e valuta (EUR/USD), pulsanti screenshot, scorciatoie, aggiornamenti.
+- **Avvisi di aggiornamento**: una volta al giorno OmniBar controlla su GitHub e ti avvisa quando esce una nuova versione (non installa mai niente da sola).
 
 | Elenco documenti | Bitcoin | Impostazioni rapide |
 |---|---|---|
@@ -61,7 +63,7 @@ Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. 
 
 ## Privacy e sicurezza
 
-- **Nessuna telemetria, nessun account.** L'unica connessione di rete va all'API pubblica di CoinGecko, in HTTPS, per il prezzo del Bitcoin, e non contiene informazioni su di te.
+- **Nessuna telemetria, nessun account.** OmniBar fa due tipi di connessione, entrambe in HTTPS e senza informazioni su di te: l'API pubblica di CoinGecko per il prezzo del Bitcoin (spenta se nascondi il widget) e, una volta al giorno, l'API pubblica di GitHub per controllare se c'è una nuova versione (si disattiva in Impostazioni › Aggiornamenti).
 - **I permessi sono usati solo in locale.** Accessibilità serve a elencare, portare in primo piano e chiudere le finestre e a sapere quale documento mostra ciascuna; Registrazione schermo serve per i titoli delle finestre e gli screenshot. Niente esce dal tuo Mac.
 - **Cosa salva OmniBar sul tuo Mac:**
   - impostazioni ed elenchi di app e documenti recenti (percorsi dei file), in `~/Library/Preferences/app.omnibar.OmniBar.plist`;

@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Bitcoin price and history from the public CoinGecko API (no key needed), in euro.
+/// Bitcoin price and history from the public CoinGecko API (no key needed), in euro or US dollars.
 @MainActor
 final class CryptoTicker: ObservableObject {
     enum Range: Int, CaseIterable, Identifiable {
@@ -24,8 +24,27 @@ final class CryptoTicker: ObservableObject {
     @Published private(set) var failed = false
     @Published private(set) var history: [Range: [Double]] = [:]
 
+    /// Currency of the prices: "eur" or "usd" (Settings).
+    @Published var currency: String = CryptoTicker.storedCurrency {
+        didSet {
+            guard currency != oldValue else { return }
+            UserDefaults.standard.set(currency, forKey: Self.currencyKey)
+            price = nil
+            change24h = nil
+            sparkline = []
+            history = [:]
+            refresh()
+        }
+    }
+
     private var timer: Timer?
     private static let base = "https://api.coingecko.com/api/v3"
+    nonisolated private static let currencyKey = "btcCurrency"
+    nonisolated static let currencies = ["eur", "usd"]
+    nonisolated static var storedCurrency: String {
+        let c = UserDefaults.standard.string(forKey: currencyKey) ?? "eur"
+        return currencies.contains(c) ? c : "eur"
+    }
 
     /// Last good values, shown at launch and kept when CoinGecko rate-limits a request.
     private struct Cache: Codable {
@@ -33,11 +52,13 @@ final class CryptoTicker: ObservableObject {
         let change: Double?
         let sparkline: [Double]
         let updated: Date
+        let currency: String?
     }
     private static let cacheKey = "btcCache"
 
     init() {
-        if let data = UserDefaults.standard.data(forKey: Self.cacheKey), let c = try? JSONDecoder().decode(Cache.self, from: data) {
+        if let data = UserDefaults.standard.data(forKey: Self.cacheKey), let c = try? JSONDecoder().decode(Cache.self, from: data),
+           (c.currency ?? "eur") == currency {
             price = c.price
             change24h = c.change
             sparkline = c.sparkline
@@ -51,13 +72,18 @@ final class CryptoTicker: ObservableObject {
     }
 
     func refresh() {
+        // No requests at all while the widget is hidden (Settings › Taskbar).
+        guard UserDefaults.standard.object(forKey: "showCrypto") as? Bool ?? true else { return }
+        let cur = currency
         Task { @MainActor in
-            async let summary = Self.json("\(Self.base)/simple/price?ids=bitcoin&vs_currencies=eur&include_24hr_change=true")
-            async let chart = Self.prices(days: 1)
+            async let summary = Self.json("\(Self.base)/simple/price?ids=bitcoin&vs_currencies=\(cur)&include_24hr_change=true")
+            async let chart = Self.prices(days: 1, currency: cur)
             let (s, c) = await (summary, chart)
-            if let btc = (s as? [String: Any])?["bitcoin"] as? [String: Any], let eur = btc["eur"] as? Double {
-                price = eur
-                change24h = btc["eur_24h_change"] as? Double
+            // Drop a late answer for the currency that was just switched away from.
+            guard cur == currency else { return }
+            if let btc = (s as? [String: Any])?["bitcoin"] as? [String: Any], let value = btc[cur] as? Double {
+                price = value
+                change24h = btc["\(cur)_24h_change"] as? Double
                 updated = Date()
                 failed = false
             } else {
@@ -70,7 +96,7 @@ final class CryptoTicker: ObservableObject {
                 history[.day] = c
             }
             if let price, let updated {
-                let cache = Cache(price: price, change: change24h, sparkline: sparkline, updated: updated)
+                let cache = Cache(price: price, change: change24h, sparkline: sparkline, updated: updated, currency: cur)
                 if let data = try? JSONEncoder().encode(cache) { UserDefaults.standard.set(data, forKey: Self.cacheKey) }
             }
         }
@@ -79,13 +105,14 @@ final class CryptoTicker: ObservableObject {
     /// Loads the chart for a range (cached for the session, refreshed on every open of the flyout).
     func load(_ range: Range) {
         Task { @MainActor in
-            let points = await Self.prices(days: range.rawValue)
-            if !points.isEmpty { history[range] = points }
+            let cur = currency
+            let points = await Self.prices(days: range.rawValue, currency: cur)
+            if !points.isEmpty, cur == currency { history[range] = points }
         }
     }
 
-    private static func prices(days: Int) async -> [Double] {
-        let obj = await json("\(base)/coins/bitcoin/market_chart?vs_currency=eur&days=\(days)")
+    private static func prices(days: Int, currency: String) async -> [Double] {
+        let obj = await json("\(base)/coins/bitcoin/market_chart?vs_currency=\(currency)&days=\(days)")
         let rows = (obj as? [String: Any])?["prices"] as? [[Double]] ?? []
         return rows.compactMap { $0.count == 2 ? $0[1] : nil }
     }
@@ -99,8 +126,8 @@ final class CryptoTicker: ObservableObject {
         return try? JSONSerialization.jsonObject(with: data)
     }
 
-    static func euro(_ value: Double, decimals: Int = 0) -> String {
-        value.formatted(.currency(code: "EUR").precision(.fractionLength(decimals)))
+    static func money(_ value: Double, decimals: Int = 0) -> String {
+        value.formatted(.currency(code: storedCurrency.uppercased()).precision(.fractionLength(decimals)))
     }
 
     static func percent(_ value: Double) -> String {
@@ -162,7 +189,7 @@ struct CryptoWidget: View {
                     Sparkline(points: ticker.sparkline, color: color, lineWidth: 1.2).frame(width: 46, height: 22)
                 }
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(ticker.price.map { CryptoTicker.euro($0) } ?? (ticker.failed ? L("Unavailable") : "BTC…"))
+                    Text(ticker.price.map { CryptoTicker.money($0) } ?? (ticker.failed ? L("Unavailable") : "BTC…"))
                         .font(.system(size: 12, weight: .semibold)).foregroundStyle(f.text)
                     if let change = ticker.change24h {
                         Text(CryptoTicker.percent(change)).font(.system(size: 11)).foregroundStyle(color)
@@ -197,11 +224,11 @@ struct CryptoFlyout: View {
                 Image(systemName: "bitcoinsign.circle.fill").font(.system(size: 28)).foregroundStyle(Color.orange)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("Bitcoin").font(.system(size: 13, weight: .semibold))
-                    Text("BTC · EUR").font(.system(size: 11)).foregroundStyle(f.secondary)
+                    Text("BTC · \(ticker.currency.uppercased())").font(.system(size: 11)).foregroundStyle(f.secondary)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 1) {
-                    Text(ticker.price.map { CryptoTicker.euro($0) } ?? "—").font(.system(size: 20, weight: .semibold))
+                    Text(ticker.price.map { CryptoTicker.money($0) } ?? "—").font(.system(size: 20, weight: .semibold))
                     if let change { Text(CryptoTicker.percent(change) + " · " + range.label).font(.system(size: 11)).foregroundStyle(color) }
                 }
                 .monospacedDigit()
@@ -229,9 +256,9 @@ struct CryptoFlyout: View {
 
             HStack {
                 if let lo = points.min(), let hi = points.max() {
-                    Text("Min \(CryptoTicker.euro(lo))")
+                    Text("Min \(CryptoTicker.money(lo))")
                     Spacer()
-                    Text("Max \(CryptoTicker.euro(hi))")
+                    Text("Max \(CryptoTicker.money(hi))")
                 }
             }
             .font(.system(size: 11)).foregroundStyle(f.secondary).monospacedDigit()
