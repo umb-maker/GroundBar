@@ -46,8 +46,8 @@ enum Snapshot {
 extension TaskbarController {
     /// Debug: opens the window picker with sample documents.
     func showDemoPreview() {
-        let names = ["Relazione trimestrale.docx", "Budget 2026.xlsx", "Contratto firmato.pdf", "Verbale riunione.docx",
-                     "Fatture ottobre.xlsx", "Manuale utente.pdf", "Lettera cliente.docx"]
+        let names = ["Quarterly report.docx", "Budget 2026.xlsx", "Signed contract.pdf", "Meeting minutes.docx",
+                     "October invoices.xlsx", "User manual.pdf", "Customer letter.docx"]
         let docs = names.enumerated().map { i, n in
             AppWindow(id: "demo\(i)", title: n, frame: .zero, scWindow: nil,
                       document: URL(fileURLWithPath: "/tmp/\(n)"), minimized: i == 3)

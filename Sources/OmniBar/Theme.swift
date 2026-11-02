@@ -7,12 +7,12 @@ enum ThemeMode: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .system: "Sistema"
-        case .light: "Chiaro"
-        case .dark: "Scuro"
-        case .halloween: "Halloween 🎃"
-        case .christmas: "Natale 🎄"
-        case .santa: "Babbo Natale 🎅"
+        case .system: L("System")
+        case .light: L("Light")
+        case .dark: L("Dark")
+        case .halloween: L("Halloween 🎃")
+        case .christmas: L("Christmas 🎄")
+        case .santa: L("Santa 🎅")
         }
     }
 

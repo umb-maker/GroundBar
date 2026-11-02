@@ -9,10 +9,10 @@ final class CryptoTicker: ObservableObject {
         var id: Int { rawValue }
         var label: String {
             switch self {
-            case .day: "24 ore"
-            case .week: "7 giorni"
-            case .month: "30 giorni"
-            case .year: "1 anno"
+            case .day: L("24 hours")
+            case .week: L("7 days")
+            case .month: L("30 days")
+            case .year: L("1 year")
             }
         }
     }
@@ -162,7 +162,7 @@ struct CryptoWidget: View {
                     Sparkline(points: ticker.sparkline, color: color, lineWidth: 1.2).frame(width: 46, height: 22)
                 }
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(ticker.price.map { CryptoTicker.euro($0) } ?? (ticker.failed ? "Non disponibile" : "BTC…"))
+                    Text(ticker.price.map { CryptoTicker.euro($0) } ?? (ticker.failed ? L("Unavailable") : "BTC…"))
                         .font(.system(size: 12, weight: .semibold)).foregroundStyle(f.text)
                     if let change = ticker.change24h {
                         Text(CryptoTicker.percent(change)).font(.system(size: 11)).foregroundStyle(color)
@@ -177,7 +177,7 @@ struct CryptoWidget: View {
         .background(GeometryReader { g in
             Color.clear.onAppear { frame = g.frame(in: .global) }.onChange(of: g.frame(in: .global)) { _, n in frame = n }
         })
-        .help("Bitcoin – andamento 24 ore (fonte: CoinGecko)")
+        .help("Bitcoin – 24-hour trend (source: CoinGecko)")
     }
 }
 
@@ -237,10 +237,10 @@ struct CryptoFlyout: View {
             .font(.system(size: 11)).foregroundStyle(f.secondary).monospacedDigit()
 
             HStack {
-                Text(ticker.updated.map { "Aggiornato alle \($0.formatted(date: .omitted, time: .shortened)) · CoinGecko" } ?? "CoinGecko")
+                Text(ticker.updated.map { L("Updated at \($0.formatted(date: .omitted, time: .shortened)) · CoinGecko") } ?? "CoinGecko")
                     .font(.system(size: 10)).foregroundStyle(f.secondary)
                 Spacer()
-                Button("Apri su CoinGecko") {
+                Button("Open on CoinGecko") {
                     TaskbarController.shared.closeFlyout()
                     TaskbarController.openSettings("https://www.coingecko.com/it/monete/bitcoin")
                 }

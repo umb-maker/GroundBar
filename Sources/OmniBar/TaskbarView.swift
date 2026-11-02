@@ -43,10 +43,10 @@ struct TaskbarView: View {
             HStack(spacing: 2) {
                 Spacer()
                 if !model.centered { CryptoWidget(ticker: TaskbarController.shared.crypto) }
-                BarIconButton(symbol: "rectangle.dashed", help: "Screenshot di una porzione dello schermo") {
+                BarIconButton(symbol: "rectangle.dashed", help: "Screenshot of part of the screen") {
                     ScreenCapture.capture(region: true)
                 }
-                BarIconButton(symbol: "display", help: "Screenshot di tutto lo schermo") {
+                BarIconButton(symbol: "display", help: "Screenshot of the whole screen") {
                     ScreenCapture.capture(region: false)
                 }
                 TrayButton(status: status)
@@ -85,7 +85,7 @@ private struct StartButton: View {
             .frame(width: 44, height: 40)
         }
         .buttonStyle(FluentButtonStyle())
-        .help("Start (⌃⌥Spazio)")
+        .help("Start (⌃⌥Space)")
     }
 }
 
@@ -111,7 +111,7 @@ struct StartGlyph: View {
 
 private struct BarIconButton: View {
     let symbol: String
-    let help: String
+    let help: LocalizedStringKey
     let action: () -> Void
     @Environment(\.colorScheme) private var scheme
 
@@ -167,15 +167,15 @@ private struct TaskButton: View {
             Text(item.name)
             Divider()
             if let url = item.url {
-                Button(item.isRunning ? "Nuova finestra" : "Apri") { TaskbarModel.launch(url) }
+                Button(item.isRunning ? "New Window" : "Open") { TaskbarModel.launch(url) }
             }
-            Button(item.pinned ? "Rimuovi dalla barra delle applicazioni" : "Aggiungi alla barra delle applicazioni") {
+            Button(item.pinned ? "Unpin from taskbar" : "Pin to taskbar") {
                 model.setPinned(item, !item.pinned)
             }
             let recent = files.recent(forApp: item.id.hasPrefix("/") ? nil : item.id)
             if !recent.isEmpty {
                 Divider()
-                Section("Recenti") {
+                Section("Recent") {
                     ForEach(recent) { entry in
                         Button { FileIndex.open(entry) } label: {
                             Label { Text(entry.name) } icon: { Image(nsImage: files.icon(entry)) }
@@ -185,7 +185,7 @@ private struct TaskButton: View {
             }
             if let app = item.app, item.isRunning {
                 Divider()
-                Button("Chiudi") { app.terminate() }
+                Button("Quit") { app.terminate() }
             }
         }
     }
@@ -220,7 +220,7 @@ private struct TrayButton: View {
         .background(GeometryReader { g in
             Color.clear.onAppear { frame = g.frame(in: .global) }.onChange(of: g.frame(in: .global)) { _, n in frame = n }
         })
-        .help("Impostazioni rapide")
+        .help("Quick settings")
     }
 }
 
@@ -242,7 +242,7 @@ private struct ShowDesktopStrip: View {
             TaskbarController.shared.closeFlyout()
             model.toggleDesktop()
         }
-        .help("Mostra desktop (⌃⌥D)")
+        .help("Show desktop (⌃⌥D)")
         .padding(.leading, 4)
     }
 }
@@ -253,11 +253,11 @@ struct BarMenu: View {
     @ObservedObject var model: TaskbarModel
 
     var body: some View {
-        Picker("Tema", selection: $model.theme) {
+        Picker("Theme", selection: $model.theme) {
             ForEach(ThemeMode.allCases) { Text($0.label).tag($0) }
         }
-        Toggle("Icone al centro", isOn: $model.centered)
-        Toggle("Avvia con il Mac", isOn: Binding(
+        Toggle("Center icons", isOn: $model.centered)
+        Toggle("Open at Login", isOn: Binding(
             get: { SMAppService.mainApp.status == .enabled },
             set: { on in
                 do {
@@ -268,14 +268,14 @@ struct BarMenu: View {
             }
         ))
         Divider()
-        Button("Nascondi automaticamente il Dock") { TaskbarController.shared.autoHideDock() }
-        Button("Permessi Accessibilità…") {
+        Button("Automatically Hide the Dock") { TaskbarController.shared.autoHideDock() }
+        Button("Accessibility Permission…") {
             TaskbarController.openSettings("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
         }
-        Button("Permessi Registrazione schermo…") {
+        Button("Screen Recording Permission…") {
             TaskbarController.openSettings("x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")
         }
         Divider()
-        Button("Esci da OmniBar") { NSApp.terminate(nil) }
+        Button("Quit OmniBar") { NSApp.terminate(nil) }
     }
 }

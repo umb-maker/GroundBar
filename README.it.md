@@ -4,6 +4,8 @@
 
 Una barra delle applicazioni per macOS in basso sullo schermo, con menu Start, elenco dei documenti aperti per ogni app, file recenti, widget Bitcoin e temi. Scritta in Swift/SwiftUI + AppKit, senza dipendenze esterne.
 
+Disponibile in **italiano** e **inglese**: OmniBar segue la lingua impostata in macOS.
+
 ![OmniBar, tema scuro](docs/images/bar-dark.png)
 ![OmniBar, tema Halloween](docs/images/bar-halloween.png)
 
@@ -24,7 +26,7 @@ Una barra delle applicazioni per macOS in basso sullo schermo, con menu Start, e
 
 | Elenco documenti | Bitcoin | Impostazioni rapide |
 |---|---|---|
-| ![](docs/images/window-list.png) | ![](docs/images/btc.png) | ![](docs/images/quick-settings.png) |
+| ![](docs/images/it/window-list.png) | ![](docs/images/it/btc.png) | ![](docs/images/it/quick-settings.png) |
 
 ## Requisiti
 

@@ -64,7 +64,7 @@ struct StartMenuView: View {
     private func searchField(_ f: Fluent) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass").foregroundStyle(f.secondary)
-            TextField("Cerca app e file", text: $query)
+            TextField("Search apps and files", text: $query)
                 .textFieldStyle(.plain)
                 .font(.system(size: 14))
                 .focused($searchFocused)
@@ -83,7 +83,7 @@ struct StartMenuView: View {
         .overlay(Capsule().strokeBorder(searchFocused ? f.accent.opacity(0.8) : f.stroke, lineWidth: 1))
     }
 
-    private func sectionHeader(_ title: String, button: String, action: @escaping () -> Void) -> some View {
+    private func sectionHeader(_ title: LocalizedStringKey, button: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         let f = Fluent(scheme)
         return HStack {
             Text(title).font(.system(size: 14, weight: .semibold)).foregroundStyle(f.text)
@@ -100,11 +100,11 @@ struct StartMenuView: View {
         .padding(.bottom, 8)
     }
 
-    /// Recently used apps, then "Consigliati" (recent files), as in Windows 11.
+    /// Recently used apps, then "Recommended" (recent files), as in Windows 11.
     private func home(_ f: Fluent) -> some View {
         ScrollView {
             VStack(spacing: 0) {
-                sectionHeader("App recenti", button: "Tutte le app  ›") { showAll = true }
+                sectionHeader("Recent apps", button: "All apps  ›") { showAll = true }
                 LazyVGrid(columns: Array(repeating: GridItem(.fixed(88), spacing: 4), count: 6), spacing: 6) {
                     ForEach(catalog.recentApps) { entry in
                         Button { open(entry) } label: {
@@ -122,9 +122,9 @@ struct StartMenuView: View {
                 .padding(.horizontal, 32)
                 .padding(.bottom, 20)
 
-                sectionHeader("Consigliati", button: "Altro  ›") { showAllRecent = true }
+                sectionHeader("Recommended", button: "More  ›") { showAllRecent = true }
                 if files.recent.isEmpty {
-                    Text("I file che apri compariranno qui.")
+                    Text("Files you open will appear here.")
                         .font(.system(size: 12)).foregroundStyle(f.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 48).padding(.vertical, 8)
@@ -141,7 +141,7 @@ struct StartMenuView: View {
 
     private func recentList(_ f: Fluent) -> some View {
         VStack(spacing: 0) {
-            sectionHeader("Consigliati", button: "‹  Indietro") { showAllRecent = false }
+            sectionHeader("Recommended", button: "‹  Back") { showAllRecent = false }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 2) {
                     ForEach(files.recent) { entry in fileRow(entry, f, selected: false) }
@@ -171,15 +171,15 @@ struct StartMenuView: View {
         .buttonStyle(FluentButtonStyle(selected: selected))
         .help(entry.url.path)
         .contextMenu {
-            Button("Apri") { open(.file(entry)) }
-            Button("Mostra nel Finder") { NSWorkspace.shared.activateFileViewerSelecting([entry.url]) }
-            Button("Fissa sulla barra delle applicazioni") { model.pin(entry.url) }
+            Button("Open") { open(.file(entry)) }
+            Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([entry.url]) }
+            Button("Pin to taskbar") { model.pin(entry.url) }
         }
     }
 
     private func allAppsList(_ f: Fluent) -> some View {
         VStack(spacing: 0) {
-            sectionHeader("Tutte le app", button: "‹  Indietro") { showAll = false }
+            sectionHeader("All apps", button: "‹  Back") { showAll = false }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     let groups = Dictionary(grouping: catalog.apps) { initial($0.name) }
@@ -199,15 +199,15 @@ struct StartMenuView: View {
         let appCount = list.filter { if case .app = $0 { true } else { false } }.count
         return VStack(alignment: .leading, spacing: 0) {
             if list.isEmpty {
-                Text("Nessun risultato per \"\(query)\"")
+                Text("No results for “\(query)”")
                     .font(.system(size: 13, weight: .semibold)).foregroundStyle(f.text)
                     .padding(.horizontal, 48).padding(.bottom, 6)
             }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 2) {
                     ForEach(Array(list.enumerated()), id: \.element.id) { i, hit in
-                        if i == 0 && appCount > 0 { resultsHeader("App", f) }
-                        if i == appCount { resultsHeader("File", f) }
+                        if i == 0 && appCount > 0 { resultsHeader("Apps", f) }
+                        if i == appCount { resultsHeader("Files", f) }
                         switch hit {
                         case .app(let entry): row(entry, f, selected: i == selection)
                         case .file(let entry): fileRow(entry, f, selected: i == selection)
@@ -219,7 +219,7 @@ struct StartMenuView: View {
         }
     }
 
-    private func resultsHeader(_ title: String, _ f: Fluent) -> some View {
+    private func resultsHeader(_ title: LocalizedStringKey, _ f: Fluent) -> some View {
         Text(title).font(.system(size: 12, weight: .semibold)).foregroundStyle(f.secondary)
             .padding(.leading, 12).padding(.top, 8).padding(.bottom, 4)
     }
@@ -243,12 +243,12 @@ struct StartMenuView: View {
 
     @ViewBuilder
     private func entryMenu(_ entry: AppEntry) -> some View {
-        Button("Apri") { open(entry) }
+        Button("Open") { open(entry) }
         Divider()
         if !model.isPinnedToBar(entry) {
-            Button("Aggiungi alla barra delle applicazioni") { model.pinToBar(entry) }
+            Button("Pin to taskbar") { model.pinToBar(entry) }
         }
-        Button("Mostra nel Finder") { NSWorkspace.shared.activateFileViewerSelecting([entry.url]) }
+        Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([entry.url]) }
     }
 
     private func footer(_ f: Fluent) -> some View {
@@ -257,19 +257,19 @@ struct StartMenuView: View {
             Text(NSFullUserName()).font(.system(size: 12)).foregroundStyle(f.text)
             Spacer()
             Menu {
-                Button("Blocca") { Power.lock() }
-                Button("Sospendi") { Power.run("sleep") }
+                Button("Lock Screen") { Power.lock() }
+                Button("Sleep") { Power.run("sleep") }
                 Divider()
-                Button("Esci (logout)") { Power.run("log out") }
-                Button("Riavvia") { Power.run("restart") }
-                Button("Arresta il sistema") { Power.run("shut down") }
+                Button("Log Out") { Power.run("log out") }
+                Button("Restart") { Power.run("restart") }
+                Button("Shut Down") { Power.run("shut down") }
             } label: {
                 Image(systemName: "power").font(.system(size: 15)).foregroundStyle(f.text)
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .frame(width: 36, height: 36)
-            .help("Arresta")
+            .help("Power")
         }
         .padding(.horizontal, 48)
         .frame(height: 64)

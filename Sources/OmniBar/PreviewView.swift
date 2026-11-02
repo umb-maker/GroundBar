@@ -118,9 +118,9 @@ struct PreviewView: View {
                         Image(nsImage: model.icon).resizable().frame(width: 16, height: 16)
                         Text(model.name).font(.system(size: 12, weight: .semibold))
                     }
-                    Text("Per elencare le finestre OmniBar ha bisogno del permesso Accessibilità.")
+                    Text("OmniBar needs the Accessibility permission to list windows.")
                         .font(.system(size: 11)).foregroundStyle(f.secondary).fixedSize(horizontal: false, vertical: true)
-                    Button("Apri Impostazioni Accessibilità") {
+                    Button("Open Accessibility Settings") {
                         TaskbarController.shared.hidePreview()
                         TaskbarController.openSettings("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
                     }
@@ -142,7 +142,7 @@ struct PreviewView: View {
                         Image(nsImage: model.icon).resizable().frame(width: 18, height: 18)
                         Text(model.name).font(.system(size: 12, weight: .semibold))
                         Spacer()
-                        Text("\(model.cards.count) finestre").font(.system(size: 11)).foregroundStyle(f.secondary)
+                        Text("\(model.cards.count) windows").font(.system(size: 11)).foregroundStyle(f.secondary)
                     }
                     .foregroundStyle(f.text)
                     .padding(.horizontal, 14)
@@ -183,7 +183,7 @@ private struct CloseButton: View {
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
         .opacity(visible ? 1 : 0)
-        .help("Chiudi finestra")
+        .help("Close window")
     }
 }
 
@@ -202,7 +202,7 @@ private struct PreviewRow: View {
                 Text(card.window.displayName).font(.system(size: 12)).foregroundStyle(f.text)
                     .lineLimit(1).truncationMode(.middle)
                 if card.window.minimized {
-                    Text("Ridotto a icona").font(.system(size: 10)).foregroundStyle(f.secondary)
+                    Text("Minimized").font(.system(size: 10)).foregroundStyle(f.secondary)
                 }
             }
             Spacer(minLength: 4)
@@ -242,7 +242,7 @@ private struct PreviewCard: View {
                     VStack(spacing: 6) {
                         Image(nsImage: card.icon).resizable().frame(width: 48, height: 48).opacity(0.85)
                         if card.window.minimized {
-                            Text("Ridotto a icona").font(.system(size: 10)).foregroundStyle(f.secondary)
+                            Text("Minimized").font(.system(size: 10)).foregroundStyle(f.secondary)
                         }
                     }
                 }

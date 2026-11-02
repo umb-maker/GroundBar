@@ -7,7 +7,7 @@ A Windows-style taskbar for macOS: a bottom bar with a Start menu of recent apps
 ![OmniBar, dark theme](docs/images/bar-dark.png)
 ![OmniBar, Halloween theme](docs/images/bar-halloween.png)
 
-> **Note:** the user interface is currently in Italian. An English localisation is planned.
+Available in **English** and **Italian**: OmniBar follows the language set in macOS.
 
 ## Features
 
@@ -61,7 +61,7 @@ With ad-hoc signing, macOS may ask for the permissions again after every rebuild
 
 ## Known limitations
 
-- macOS doesn't let an app reserve space at the edge of the screen, so maximised windows can extend under the bar. Hiding the Dock automatically helps (right-click the bar › *Nascondi automaticamente il Dock*).
+- macOS doesn't let an app reserve space at the edge of the screen, so maximised windows can extend under the bar. Hiding the Dock automatically helps (right-click the bar › *Automatically Hide the Dock*).
 - Tabs inside one window (e.g. several PDFs in tabs) appear as a single document.
 - Only windows on the current Space are listed.
 - Other apps' menu bar icons don't appear in the tray.

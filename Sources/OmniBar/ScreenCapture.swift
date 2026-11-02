@@ -30,7 +30,7 @@ enum ScreenCapture {
             NSPasteboard.general.writeObjects([image])
         }
         TaskbarController.shared.showToast(
-            title: "Screenshot salvato e copiato negli appunti",
+            title: L("Screenshot saved and copied to the clipboard"),
             detail: url.lastPathComponent
         ) {
             NSWorkspace.shared.open(url)
@@ -50,7 +50,7 @@ enum ScreenCapture {
 
     private static func fileName() -> String {
         let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd 'alle' HH.mm.ss"
+        f.dateFormat = "yyyy-MM-dd '\(L("at"))' HH.mm.ss"
         return "Screenshot \(f.string(from: Date())).png"
     }
 }
@@ -81,6 +81,6 @@ struct ToastView: View {
             TaskbarController.shared.hideToast()
             action()
         }
-        .help("Clic per aprire lo screenshot")
+        .help("Click to open the screenshot")
     }
 }

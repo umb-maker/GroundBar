@@ -1,0 +1,81 @@
+/* OmniBar – Italian translation. Keys are the English source strings. */
+
+/* Themes */
+"System" = "Sistema";
+"Light" = "Chiaro";
+"Dark" = "Scuro";
+"Halloween 🎃" = "Halloween 🎃";
+"Christmas 🎄" = "Natale 🎄";
+"Santa 🎅" = "Babbo Natale 🎅";
+"Theme" = "Tema";
+"Theme: %@" = "Tema: %@";
+
+/* Taskbar */
+"Start (⌃⌥Space)" = "Start (⌃⌥Spazio)";
+"Screenshot of part of the screen" = "Screenshot di una porzione dello schermo";
+"Screenshot of the whole screen" = "Screenshot di tutto lo schermo";
+"New Window" = "Nuova finestra";
+"Open" = "Apri";
+"Unpin from taskbar" = "Rimuovi dalla barra delle applicazioni";
+"Pin to taskbar" = "Aggiungi alla barra delle applicazioni";
+"Recent" = "Recenti";
+"Quit" = "Chiudi";
+"Quick settings" = "Impostazioni rapide";
+"Show desktop (⌃⌥D)" = "Mostra desktop (⌃⌥D)";
+"Center icons" = "Icone al centro";
+"Open at Login" = "Avvia con il Mac";
+"Automatically Hide the Dock" = "Nascondi automaticamente il Dock";
+"Accessibility Permission…" = "Permessi Accessibilità…";
+"Screen Recording Permission…" = "Permessi Registrazione schermo…";
+"Quit OmniBar" = "Esci da OmniBar";
+
+/* Start menu */
+"Search apps and files" = "Cerca app e file";
+"Recent apps" = "App recenti";
+"All apps  ›" = "Tutte le app  ›";
+"All apps" = "Tutte le app";
+"Recommended" = "Consigliati";
+"More  ›" = "Altro  ›";
+"‹  Back" = "‹  Indietro";
+"Files you open will appear here." = "I file che apri compariranno qui.";
+"Show in Finder" = "Mostra nel Finder";
+"Apps" = "App";
+"Files" = "File";
+"No results for “%@”" = "Nessun risultato per “%@”";
+"Lock Screen" = "Blocca";
+"Sleep" = "Sospendi";
+"Log Out" = "Esci (logout)";
+"Restart" = "Riavvia";
+"Shut Down" = "Arresta il sistema";
+"Power" = "Arresta";
+
+/* Window list */
+"OmniBar needs the Accessibility permission to list windows." = "Per elencare le finestre OmniBar ha bisogno del permesso Accessibilità.";
+"Open Accessibility Settings" = "Apri Impostazioni Accessibilità";
+"Close window" = "Chiudi finestra";
+"Minimized" = "Ridotto a icona";
+"%lld windows" = "%lld finestre";
+
+/* Quick settings and calendar */
+"Offline" = "Non connesso";
+"Network" = "Rete";
+"System Settings" = "Impostazioni di Sistema";
+"%lld% · charging" = "%lld% · in carica";
+"%lld%% · charging" = "%lld%% · in carica";
+"Open Calendar" = "Apri Calendario";
+
+/* Bitcoin */
+"24 hours" = "24 ore";
+"7 days" = "7 giorni";
+"30 days" = "30 giorni";
+"1 year" = "1 anno";
+"Unavailable" = "Non disponibile";
+"Bitcoin – 24-hour trend (source: CoinGecko)" = "Bitcoin – andamento 24 ore (fonte: CoinGecko)";
+"Updated at %@ · CoinGecko" = "Aggiornato alle %@ · CoinGecko";
+"Open on CoinGecko" = "Apri su CoinGecko";
+
+/* Screenshots */
+"Screenshot saved and copied to the clipboard" = "Screenshot salvato e copiato negli appunti";
+"Click to open the screenshot" = "Clic per aprire lo screenshot";
+/* Used in the file name: "Screenshot 2026-11-02 at 18.05.12.png" */
+"at" = "alle";

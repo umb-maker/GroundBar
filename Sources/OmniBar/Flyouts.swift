@@ -12,13 +12,13 @@ struct QuickSettingsView: View {
         let f = Fluent(scheme)
         VStack(spacing: 0) {
             HStack(spacing: 10) {
-                Tile(symbol: status.networkSymbol, label: status.network == .offline ? "Non connesso" : "Rete", on: status.network != .offline) {
+                Tile(symbol: status.networkSymbol, label: status.network == .offline ? L("Offline") : L("Network"), on: status.network != .offline) {
                     TaskbarController.openSettings("x-apple.systempreferences:com.apple.wifi-settings-extension")
                 }
                 Tile(symbol: "dot.radiowaves.left.and.right", label: "Bluetooth", on: true) {
                     TaskbarController.openSettings("x-apple.systempreferences:com.apple.BluetoothSettings")
                 }
-                Tile(symbol: model.theme == .santa ? "sparkles" : model.theme == .christmas ? "snowflake" : model.theme == .halloween ? "moon.stars.fill" : model.theme == .dark ? "moon.fill" : "sun.max.fill", label: "Tema: \(model.theme.label)", on: model.theme != .system) {
+                Tile(symbol: model.theme == .santa ? "sparkles" : model.theme == .christmas ? "snowflake" : model.theme == .halloween ? "moon.stars.fill" : model.theme == .dark ? "moon.fill" : "sun.max.fill", label: L("Theme: \(model.theme.label)"), on: model.theme != .system) {
                     let all = ThemeMode.allCases
                     model.theme = all[(all.firstIndex(of: model.theme)! + 1) % all.count]
                 }
@@ -42,14 +42,14 @@ struct QuickSettingsView: View {
             HStack {
                 if let level = status.batteryLevel {
                     Image(systemName: status.batterySymbol)
-                    Text("\(level)%\(status.charging ? " · in carica" : "")").font(.system(size: 12))
+                    Text(status.charging ? L("\(level)% · charging") : "\(level)%").font(.system(size: 12))
                 }
                 Spacer()
                 Button { TaskbarController.openSettings("x-apple.systempreferences:") } label: {
                     Image(systemName: "gearshape").frame(width: 30, height: 30)
                 }
                 .buttonStyle(FluentButtonStyle())
-                .help("Impostazioni di Sistema")
+                .help("System Settings")
             }
             .foregroundStyle(f.text)
             .padding(.horizontal, 16)
@@ -106,7 +106,7 @@ struct CalendarFlyout: View {
             Spacer(minLength: 0)
             HStack {
                 Spacer()
-                Button("Apri Calendario") { TaskbarController.openSettings("ical://") }
+                Button("Open Calendar") { TaskbarController.openSettings("ical://") }
                     .buttonStyle(.link)
                     .padding(12)
             }

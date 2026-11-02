@@ -25,11 +25,14 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/OmniBar"
 cp Resources/StartIcon.png "$APP/Contents/Resources/"
+cp -R Resources/*.lproj "$APP/Contents/Resources/"
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+  <key>CFBundleDevelopmentRegion</key><string>en</string>
+  <key>CFBundleLocalizations</key><array><string>en</string><string>it</string></array>
   <key>CFBundleIdentifier</key><string>app.omnibar.OmniBar</string>
   <key>CFBundleName</key><string>OmniBar</string>
   <key>CFBundleExecutable</key><string>OmniBar</string>
@@ -39,7 +42,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
-  <key>NSAppleEventsUsageDescription</key><string>OmniBar usa System Events per Sospendi, Riavvia, Arresta e Logout dal menu Start.</string>
+  <key>NSAppleEventsUsageDescription</key><string>OmniBar uses System Events for Sleep, Restart, Shut Down and Log Out in the Start menu.</string>
 </dict>
 </plist>
 PLIST
@@ -48,6 +51,6 @@ if [ -n "$OMNIBAR_SIGN_IDENTITY" ] && security find-certificate -c "$OMNIBAR_SIG
   codesign --force --sign "$OMNIBAR_SIGN_IDENTITY" "$APP"
 else
   codesign --force --sign - "$APP"
-  echo "Firma ad-hoc: macOS chiederà di nuovo i permessi dopo ogni build (vedi OMNIBAR_SIGN_IDENTITY)."
+  echo "Ad-hoc signature: macOS will ask for permissions again after every build (see OMNIBAR_SIGN_IDENTITY)."
 fi
-echo "Creato $APP"
+echo "Built $APP"

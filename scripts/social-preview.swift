@@ -49,7 +49,7 @@ text("OmniBar", .systemFont(ofSize: 92, weight: .heavy), .white, at: NSPoint(x: 
 text("A Windows-style taskbar for macOS", .systemFont(ofSize: 34, weight: .medium), ivory.withAlphaComponent(0.85), at: NSPoint(x: 86, y: 300))
 
 let features = ["Start menu with app & file search", "Per-app document list", "Recent files & jump lists",
-                "Bitcoin widget · Light, dark & Halloween themes"]
+                "Bitcoin widget · Light, dark & seasonal themes"]
 for (i, f) in features.enumerated() {
     let y = 246 - CGFloat(i) * 40
     NSColor(red: 1, green: 0.55, blue: 0.12, alpha: 1).setFill()
