@@ -25,7 +25,9 @@ enum ThemeMode: String, CaseIterable, Identifiable {
     }
 }
 
-/// Fluent (Windows 11) palette: light, dark, and seasonal variants of dark (Halloween, Christmas).
+/// Fluent (Windows 11) palette: light, dark, and seasonal variants of dark (Halloween, Christmas, Santa).
+/// Custom on purpose: the bar and its flyouts are Groundbar's Windows-style identity. Everything else
+/// (Settings, welcome window, menus) uses the system's own controls and colours.
 struct Fluent {
     /// Set by the model to the active theme; the bar is rebuilt on every theme change.
     nonisolated(unsafe) static var theme: ThemeMode = .system
@@ -80,8 +82,16 @@ struct Fluent {
     var hover: Color { seasonal.map { $0.highlight.opacity(0.14) } ?? (dark ? Color.white.opacity(0.08) : Color.black.opacity(0.05)) }
     var activeBg: Color { seasonal.map { $0.highlight.opacity(0.12) } ?? (dark ? Color.white.opacity(0.06) : Color.white.opacity(0.65)) }
     var stroke: Color { seasonal.map { $0.highlight.opacity(0.30) } ?? (dark ? Color.white.opacity(0.09) : Color.black.opacity(0.08)) }
-    var accent: Color { seasonal?.accent ?? (dark ? Color(red: 0.30, green: 0.76, blue: 1.0) : Color(red: 0.0, green: 0.40, blue: 0.75)) }
-    var onAccent: Color { seasonal?.onAccent ?? (dark ? .black : .white) }
+    /// The Mac's own accent colour (System Settings › Appearance) in the System, Light and Dark themes,
+    /// so the bar matches the system controls next to it; seasonal themes keep their own colours.
+    var accent: Color { seasonal?.accent ?? Color(nsColor: .controlAccentColor) }
+    /// Text and symbols on an accent fill: black on light accents (yellow, green), white otherwise.
+    var onAccent: Color { seasonal?.onAccent ?? (Self.systemAccentIsLight ? .black : .white) }
+
+    private static var systemAccentIsLight: Bool {
+        guard let c = NSColor.controlAccentColor.usingColorSpace(.sRGB) else { return false }
+        return 0.2126 * c.redComponent + 0.7152 * c.greenComponent + 0.0722 * c.blueComponent > 0.6
+    }
     var text: Color { seasonal?.text ?? (dark ? .white : Color(white: 0.1)) }
     var secondary: Color { seasonal.map { $0.text.opacity(0.6) } ?? (dark ? Color.white.opacity(0.62) : Color.black.opacity(0.56)) }
     var field: Color { seasonal != nil ? Color.white.opacity(0.06) : dark ? Color.white.opacity(0.07) : Color.white.opacity(0.9) }

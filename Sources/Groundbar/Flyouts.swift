@@ -15,10 +15,11 @@ struct QuickSettingsView: View {
                 Tile(symbol: status.networkSymbol, label: status.network == .offline ? L("Offline") : L("Network"), on: status.network != .offline) {
                     TaskbarController.openSettings("x-apple.systempreferences:com.apple.wifi-settings-extension")
                 }
-                Tile(symbol: "dot.radiowaves.left.and.right", label: "Bluetooth", on: true) {
+                // Groundbar does not know the Bluetooth state: a neutral tile, not a lit one.
+                Tile(symbol: "dot.radiowaves.left.and.right", label: "Bluetooth", on: false) {
                     TaskbarController.openSettings("x-apple.systempreferences:com.apple.BluetoothSettings")
                 }
-                Tile(symbol: model.theme == .santa ? "sparkles" : model.theme == .christmas ? "snowflake" : model.theme == .halloween ? "moon.stars.fill" : model.theme == .dark ? "moon.fill" : "sun.max.fill", label: L("Theme: \(model.theme.label)"), on: model.theme != .system) {
+                Tile(symbol: model.theme == .santa ? "sparkles" : model.theme == .christmas ? "snowflake" : model.theme == .halloween ? "moon.stars.fill" : model.theme == .dark ? "moon.fill" : "sun.max.fill", label: L("Theme: \(model.theme.label)"), on: false) {
                     let all = ThemeMode.allCases
                     model.theme = all[(all.firstIndex(of: model.theme)! + 1) % all.count]
                 }

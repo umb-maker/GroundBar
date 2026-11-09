@@ -3,6 +3,9 @@ import AppKit
 /// Shared Core Animation helpers for the seasonal decorations (see Halloween.swift, Christmas.swift).
 /// The animations run in the window server, so the bar stays near 0% CPU.
 enum Decor {
+    /// System Settings › Accessibility › Display › Reduce motion: decorations then stand still.
+    static var reduceMotion: Bool { NSWorkspace.shared.accessibilityDisplayShouldReduceMotion }
+
     static func emoji(_ emoji: String, size: CGFloat, scale: CGFloat) -> CALayer {
         let text = NSAttributedString(string: emoji, attributes: [.font: NSFont.systemFont(ofSize: size)])
         let box = text.size()

@@ -260,7 +260,8 @@ final class TaskbarController {
         configure(p)
         p.hasShadow = true
         p.contentView = NSHostingView(rootView: content())
-        p.setFrame(target.offsetBy(dx: 0, dy: -24), display: false)
+        // With Reduce Motion the flyout fades in place instead of sliding up.
+        p.setFrame(Decor.reduceMotion ? target : target.offsetBy(dx: 0, dy: -24), display: false)
         p.alphaValue = 0
         p.makeKeyAndOrderFront(nil)
         NSAnimationContext.runAnimationGroup { ctx in

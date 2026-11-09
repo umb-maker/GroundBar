@@ -261,6 +261,7 @@ struct StartMenuView: View {
             }
             .buttonStyle(FluentButtonStyle())
             .help("Settings")
+            .accessibilityLabel("Settings")
             Menu {
                 Button("Lock Screen") { Power.lock() }
                 Button("Sleep") { Power.run("sleep") }
@@ -275,6 +276,7 @@ struct StartMenuView: View {
             .menuIndicator(.hidden)
             .frame(width: 36, height: 36)
             .help("Power")
+            .accessibilityLabel("Power")
         }
         .padding(.horizontal, 48)
         .frame(height: 64)

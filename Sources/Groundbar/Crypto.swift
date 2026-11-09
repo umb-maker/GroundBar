@@ -280,6 +280,7 @@ struct CryptoFlyout: View {
                     TaskbarController.shared.closeFlyout()
                     TaskbarController.openSettings("https://www.coingecko.com/it/monete/bitcoin")
                 }
+                .foregroundStyle(f.accent)
                 .buttonStyle(.link).font(.system(size: 11))
             }
         }

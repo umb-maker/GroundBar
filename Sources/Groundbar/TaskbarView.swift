@@ -99,6 +99,7 @@ private struct StartButton: View {
         }
         .buttonStyle(FluentButtonStyle())
         .help("Start (⌃⌥Space)")
+        .accessibilityLabel("Start")
     }
 }
 
@@ -134,6 +135,7 @@ private struct BarIconButton: View {
         }
         .buttonStyle(FluentButtonStyle())
         .help(help)
+        .accessibilityLabel(help)
     }
 }
 
@@ -234,6 +236,7 @@ private struct TrayButton: View {
             Color.clear.onAppear { frame = g.frame(in: .global) }.onChange(of: g.frame(in: .global)) { _, n in frame = n }
         })
         .help("Quick settings")
+        .accessibilityLabel("Quick settings")
     }
 }
 
@@ -256,6 +259,8 @@ private struct ShowDesktopStrip: View {
             model.toggleDesktop()
         }
         .help("Show desktop (⌃⌥D)")
+        .accessibilityLabel("Show desktop")
+        .accessibilityAddTraits(.isButton)
         .padding(.leading, 4)
     }
 }

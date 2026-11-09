@@ -184,6 +184,7 @@ private struct CloseButton: View {
         .onHover { hovering = $0 }
         .opacity(visible ? 1 : 0)
         .help("Close window")
+        .accessibilityLabel("Close window")
     }
 }
 

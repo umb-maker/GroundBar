@@ -13,6 +13,12 @@ enum Snapshot {
             ("btc", { c.closeFlyout(); c.toggleFlyout("btc", anchor: .left(8), size: CGSize(width: 380, height: 340)) { CryptoFlyout(ticker: c.crypto) } }),
             ("welcome", { c.closeFlyout(); c.hidePreview(); WelcomeWindow.show() }),
             ("settings", { WelcomeWindow.close(); c.updater.check(); SettingsWindow.show() }),
+            ("settings-general", { SettingsWindow.select(.general) }),
+            ("settings-appearance", { SettingsWindow.select(.appearance) }),
+            ("settings-taskbar", { SettingsWindow.select(.taskbar) }),
+            ("settings-shortcuts", { SettingsWindow.select(.shortcuts) }),
+            ("settings-permissions", { SettingsWindow.select(.permissions) }),
+            ("settings-about", { SettingsWindow.select(.about) }),
             ("preview", { c.closeFlyout(); c.showDemoPreview() }),
         ]
         // GROUNDBAR_SNAPSHOT_STEPS=bar,start limits the run to those steps.
@@ -26,7 +32,7 @@ enum Snapshot {
                 let target = steps[i].0 == "bar" ? windows.first { $0 is BarPanel && $0.frame.height == TaskbarController.barHeight }
                     : steps[i].0 == "preview" ? windows.first { $0 is BarPanel && $0.frame.height != TaskbarController.barHeight }
                     : steps[i].0 == "welcome" ? WelcomeWindow.window
-                    : steps[i].0 == "settings" ? SettingsWindow.window
+                    : steps[i].0.hasPrefix("settings") ? SettingsWindow.window
                     : windows.first { $0 is FlyoutPanel }
                 if let view = target?.contentView, let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) {
                     view.cacheDisplay(in: view.bounds, to: rep)

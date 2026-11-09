@@ -34,6 +34,8 @@ struct SantaDecor: NSViewRepresentable {
             guard bounds.size != built, bounds.width > 0, let root = layer else { return }
             built = bounds.size
             root.sublayers?.forEach { $0.removeFromSuperlayer() }
+            // A frozen layer tree keeps every decoration in place (the sleigh stays parked off-screen).
+            root.speed = Decor.reduceMotion ? 0 : 1
             let w = bounds.width, h = bounds.height
             let scale = window?.backingScaleFactor ?? 2
 

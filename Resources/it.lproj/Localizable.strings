@@ -97,20 +97,15 @@
 "Later" = "Più tardi";
 
 /* Settings */
-"Groundbar Settings" = "Impostazioni di Groundbar";
 "Settings" = "Impostazioni";
 "General" = "Generale";
 "Dock" = "Dock";
 "Taskbar" = "Barra";
 "Displays" = "Schermi";
-"Show the bar on all displays" = "Mostra la barra su tutti gli schermi";
-"Show apps on the display where their windows are" = "Mostra le app sullo schermo in cui sono aperte le loro finestre";
-"Show the Bitcoin widget" = "Mostra il widget Bitcoin";
 "Currency" = "Valuta";
 "Euro (€)" = "Euro (€)";
 "US dollar ($)" = "Dollaro USA ($)";
 "Show the screenshot buttons" = "Mostra i pulsanti screenshot";
-"Keyboard shortcuts" = "Scorciatoie da tastiera";
 "Open the 1st…9th app on the bar" = "Apri la 1ª…9ª app della barra";
 "Open Start" = "Apri Start";
 "⌃⌥Space" = "⌃⌥Spazio";
@@ -126,10 +121,28 @@
 "Last checked %@" = "Ultimo controllo: %@";
 "Never checked" = "Mai controllato";
 "Checking…" = "Controllo in corso…";
-"Groundbar is up to date" = "Groundbar è aggiornata";
 "Download Groundbar %@" = "Scarica Groundbar %@";
 "Couldn't reach GitHub" = "Impossibile contattare GitHub";
 
 /* Update notice */
 "Groundbar %@ is available" = "È disponibile Groundbar %@";
 "Click to open the download page" = "Clic per aprire la pagina di download";
+
+/* Settings tabs */
+"Appearance" = "Aspetto";
+"Shortcuts" = "Scorciatoie";
+"Open Groundbar at login" = "Apri Groundbar all'accesso";
+"The Dock" = "Il Dock";
+"Hide Automatically" = "Nascondi automaticamente";
+"The Dock can cover the bar. This turns on the same option as System Settings › Desktop & Dock." = "Il Dock può coprire la barra. Questo attiva la stessa opzione di Impostazioni di Sistema › Scrivania e Dock.";
+"System follows the Mac's light or dark mode and accent color. Seasonal themes bring their own colors and a light animation." = "Sistema segue la modalità chiara o scura e il colore d'accento del Mac. I temi stagionali hanno colori propri e una leggera animazione.";
+"Center the icons on the bar" = "Centra le icone sulla barra";
+"Show the bar on every display" = "Mostra la barra su ogni schermo";
+"Show each app on the display where its windows are" = "Mostra ogni app sullo schermo in cui sono le sue finestre";
+"On the bar" = "Sulla barra";
+"Show the Bitcoin price" = "Mostra il prezzo del Bitcoin";
+"Bitcoin prices come from CoinGecko. While the price is hidden, Groundbar sends no requests to CoinGecko." = "I prezzi del Bitcoin arrivano da CoinGecko. Mentre il prezzo è nascosto, Groundbar non invia richieste a CoinGecko.";
+"⌃⌥ stands in for the Windows key: most Mac apps already use ⌘ with a number." = "⌃⌥ sostituisce il tasto Windows: la maggior parte delle app per Mac usa già ⌘ con un numero.";
+"Open Settings…" = "Apri Impostazioni…";
+"Groundbar uses these permissions only on your Mac." = "Groundbar usa questi permessi solo sul tuo Mac.";
+"Groundbar is up to date" = "Groundbar è aggiornata";
