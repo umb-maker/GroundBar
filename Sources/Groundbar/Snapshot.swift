@@ -23,7 +23,7 @@ enum Snapshot {
             ("settings-shortcuts", { SettingsWindow.select(.shortcuts) }),
             ("settings-permissions", { SettingsWindow.select(.permissions) }),
             ("settings-about", { SettingsWindow.select(.about) }),
-            ("toast", { c.closeFlyout(); c.showToast(title: L("Screenshot saved and copied to the clipboard"),
+            ("toast", { c.closeFlyout(); c.toast.show(title: L("Screenshot saved and copied to the clipboard"),
                                                      detail: "Screenshot 2026-11-09 at 10.00.00.png", symbol: "camera.viewfinder") {} }),
             ("preview", { c.closeFlyout(); c.showDemoPreview() }),
         ]

@@ -29,7 +29,7 @@ enum ScreenCapture {
             NSPasteboard.general.clearContents()
             NSPasteboard.general.writeObjects([image])
         }
-        TaskbarController.shared.showToast(
+        TaskbarController.shared.toast.show(
             title: L("Screenshot saved and copied to the clipboard"),
             detail: url.lastPathComponent,
             symbol: "camera.viewfinder"
@@ -53,35 +53,5 @@ enum ScreenCapture {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd '\(L("at"))' HH.mm.ss"
         return "Screenshot \(f.string(from: Date())).png"
-    }
-}
-
-/// Small notification shown above the right end of the bar.
-struct ToastView: View {
-    let title: String
-    let detail: String
-    let symbol: String
-    let action: () -> Void
-    @Environment(\.colorScheme) private var scheme
-
-    var body: some View {
-        let f = Fluent(scheme)
-        HStack(spacing: 12) {
-            Image(systemName: symbol).font(.system(size: 20)).foregroundStyle(f.accent)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.system(size: 12, weight: .semibold))
-                Text(detail).font(.system(size: 11)).foregroundStyle(f.secondary).lineLimit(1).truncationMode(.middle)
-            }
-            Spacer(minLength: 0)
-        }
-        .foregroundStyle(f.text)
-        .padding(.horizontal, 14)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .flyoutChrome()
-        .contentShape(Rectangle())
-        .onTapGesture {
-            TaskbarController.shared.hideToast()
-            action()
-        }
     }
 }

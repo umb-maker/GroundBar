@@ -2,18 +2,6 @@ import AppKit
 import Combine
 import SwiftUI
 
-/// The bar itself never takes keyboard focus, so the app you were using stays in front.
-final class BarPanel: NSPanel {
-    override var canBecomeKey: Bool { false }
-    override var canBecomeMain: Bool { false }
-}
-
-/// Flyouts (Start, calendar, quick settings) take key focus without activating Groundbar.
-final class FlyoutPanel: NSPanel {
-    override var canBecomeKey: Bool { true }
-    override var canBecomeMain: Bool { false }
-}
-
 /// Owns the windows: bar, flyouts and the hover preview.
 @MainActor
 final class TaskbarController {
@@ -33,6 +21,7 @@ final class TaskbarController {
         }
     }
     let preview = PreviewModel()
+    private(set) lazy var toast = ToastPresenter(screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance })
 
     private var flyout: FlyoutPanel?
     private(set) var flyoutKind: String?
@@ -194,15 +183,7 @@ final class TaskbarController {
     }
 
     private func configure(_ p: NSPanel) {
-        p.isFloatingPanel = true
-        p.level = .statusBar
-        p.backgroundColor = .clear
-        p.isOpaque = false
-        p.hidesOnDeactivate = false
-        p.isMovable = false
-        // No .fullScreenAuxiliary: the bar must not be drawn over full-screen apps (videos, presentations).
-        p.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
-        p.appearance = model.theme.appearance
+        p.configureAsGroundbar(appearance: model.theme.appearance)
     }
 
     private func applyTheme(_ theme: ThemeMode) {
@@ -375,35 +356,6 @@ final class TaskbarController {
         previewPanel?.orderOut(nil)
         previewPanel = nil
         preview.clear()
-    }
-
-    // MARK: Toast
-
-    private var toastPanel: BarPanel?
-    private var toastTimer: Timer?
-
-    func showToast(title: String, detail: String, symbol: String, action: @escaping () -> Void) {
-        hideToast()
-        let size = CGSize(width: 340, height: 64)
-        let s = screen.frame
-        let p = BarPanel(contentRect: NSRect(x: s.maxX - size.width - 12, y: s.minY + Self.barHeight + 12, width: size.width, height: size.height),
-                         styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
-        configure(p)
-        p.hasShadow = true
-        p.contentView = NSHostingView(rootView: ToastView(title: title, detail: detail, symbol: symbol, action: action))
-        p.alphaValue = 0
-        p.orderFrontRegardless()
-        NSAnimationContext.runAnimationGroup { $0.duration = 0.15; p.animator().alphaValue = 1 }
-        toastPanel = p
-        toastTimer = Timer.scheduledTimer(withTimeInterval: 6, repeats: false) { _ in
-            MainActor.assumeIsolated { TaskbarController.shared.hideToast() }
-        }
-    }
-
-    func hideToast() {
-        toastTimer?.invalidate()
-        toastPanel?.orderOut(nil)
-        toastPanel = nil
     }
 
     // MARK: Misc

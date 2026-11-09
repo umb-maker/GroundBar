@@ -87,7 +87,7 @@ final class Updater: ObservableObject {
     }
 
     private func notify(_ release: Release) {
-        TaskbarController.shared.showToast(title: L("Groundbar \(release.version) is available"),
+        TaskbarController.shared.toast.show(title: L("Groundbar \(release.version) is available"),
                                            detail: L("Click to open the download page"),
                                            symbol: "arrow.down.circle") {
             NSWorkspace.shared.open(release.url)
