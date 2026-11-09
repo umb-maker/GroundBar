@@ -56,7 +56,7 @@ final class TaskbarController {
         hk.register(keyCode: HotKeyCenter.space) { [weak self] in self?.toggleStart() }
         hk.register(keyCode: HotKeyCenter.d) { [weak self] in self?.closeFlyout(); self?.model.toggleDesktop() }
 
-        watchFullScreen()
+        fullScreen.start(displays: { [unowned self] in Array(bars.keys) })
     }
 
     // MARK: Displays
@@ -108,45 +108,7 @@ final class TaskbarController {
 
     /// Displays whose bar is hidden because the frontmost app fills them.
     private var hiddenForFullScreen = Set<CGDirectDisplayID>()
-    private var fullScreenTimer: Timer?
-
-    /// Hides a display's bar while the frontmost app fills that display. Native full screen already lives in
-    /// its own Space (where the bar isn't shown); this also covers apps that just make a screen-sized window.
-    private func watchFullScreen() {
-        let nc = NSWorkspace.shared.notificationCenter
-        for name in [NSWorkspace.activeSpaceDidChangeNotification, NSWorkspace.didActivateApplicationNotification] {
-            nc.addObserver(forName: name, object: nil, queue: .main) { _ in
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                    MainActor.assumeIsolated { TaskbarController.shared.updateFullScreen() }
-                }
-            }
-        }
-        fullScreenTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            MainActor.assumeIsolated { TaskbarController.shared.updateFullScreen() }
-        }
-        fullScreenTimer?.tolerance = 0.3
-    }
-
-    /// Reads the window list off the main thread, then hides or shows each display's bar.
-    func updateFullScreen() {
-        guard !checkingFullScreen, !Snapshot.running else { return }
-        // Groundbar itself in front (a flyout or Settings): keep the bars as they are.
-        guard let front = NSWorkspace.shared.frontmostApplication?.processIdentifier, front != getpid() else { return }
-        checkingFullScreen = true
-        let displays = Array(bars.keys)
-        DispatchQueue.global(qos: .utility).async {
-            let covered = Self.displaysCovered(by: front, among: displays)
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated {
-                    let c = TaskbarController.shared
-                    c.checkingFullScreen = false
-                    c.apply(covered: covered)
-                }
-            }
-        }
-    }
-
-    private var checkingFullScreen = false
+    private lazy var fullScreen = FullScreenWatcher { [unowned self] covered in apply(covered: covered) }
 
     private func apply(covered: Set<CGDirectDisplayID>) {
         for (id, panel) in bars {
@@ -162,24 +124,6 @@ final class TaskbarController {
                 panel.orderFrontRegardless()
             }
         }
-    }
-
-    /// Displays filled by an on-screen window of the given app (window bounds and display bounds are
-    /// both in global coordinates with a top-left origin). Safe on any thread.
-    nonisolated private static func displaysCovered(by pid: pid_t, among displays: [CGDirectDisplayID]) -> Set<CGDirectDisplayID> {
-        let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
-        let frames = windows.compactMap { w -> CGRect? in
-            guard (w[kCGWindowOwnerPID as String] as? pid_t) == pid,
-                  (w[kCGWindowLayer as String] as? Int) == 0,
-                  let bounds = w[kCGWindowBounds as String] as? NSDictionary else { return nil }
-            return CGRect(dictionaryRepresentation: bounds)
-        }
-        return Set(displays.filter { id in
-            let d = CGDisplayBounds(id)
-            return frames.contains { r in
-                r.minX <= d.minX + 1 && r.minY <= d.minY + 1 && r.maxX >= d.maxX - 1 && r.maxY >= d.maxY - 1
-            }
-        })
     }
 
     private func configure(_ p: NSPanel) {
