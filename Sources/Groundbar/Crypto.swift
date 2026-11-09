@@ -58,6 +58,16 @@ final class CryptoTicker: ObservableObject {
     private static let cacheKey = "btcCache"
 
     init() {
+        if Demo.active {
+            // Fixed sample data, so demo snapshots are the same on every run (no network).
+            let points = Demo.bitcoinSeries
+            price = points.last
+            change24h = (points.last! - points.first!) / points.first! * 100
+            sparkline = points
+            for range in Range.allCases { history[range] = points }
+            updated = Demo.date
+            return
+        }
         if let data = UserDefaults.standard.data(forKey: Self.cacheKey), let c = try? JSONDecoder().decode(Cache.self, from: data),
            (c.currency ?? "eur") == currency {
             price = c.price
@@ -74,6 +84,7 @@ final class CryptoTicker: ObservableObject {
     }
 
     func refresh() {
+        guard !Demo.active else { return }
         // No requests at all while the widget is hidden (Settings › Taskbar).
         guard UserDefaults.standard.object(forKey: "showCrypto") as? Bool ?? true else { return }
         let cur = currency
@@ -113,6 +124,7 @@ final class CryptoTicker: ObservableObject {
 
     /// Loads the chart for a range (cached for the session, refreshed on every open of the flyout).
     func load(_ range: Range) {
+        guard !Demo.active else { return }
         Task { @MainActor in
             let cur = currency
             let points = await Self.prices(days: range.rawValue, currency: cur)

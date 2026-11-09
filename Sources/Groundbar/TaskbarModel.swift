@@ -164,7 +164,8 @@ final class TaskbarModel: ObservableObject {
 
     func refresh() {
         let ws = NSWorkspace.shared
-        let running = regularApps()
+        // Demo snapshots show the sample pins only, not what happens to be running.
+        let running = Demo.active ? [] : regularApps()
         let front = ws.frontmostApplication?.processIdentifier
         let activePID = (front == getpid() || front == nil) ? lastActivePID : front
 

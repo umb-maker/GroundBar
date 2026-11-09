@@ -19,6 +19,12 @@ final class SystemStatus: ObservableObject {
     private var timer: Timer?
 
     init() {
+        if Demo.active {
+            // Fixed sample state for demo snapshots.
+            volume = 0.5
+            batteryLevel = 80
+            return
+        }
         refresh()
         monitor.pathUpdateHandler = { [weak self] path in
             let kind: Net = path.status != .satisfied ? .offline

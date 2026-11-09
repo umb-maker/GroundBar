@@ -37,7 +37,8 @@ final class Updater: ObservableObject {
     init() {
         let d = UserDefaults.standard
         automatic = d.object(forKey: Self.automaticKey) as? Bool ?? true
-        lastCheck = d.object(forKey: Self.lastCheckKey) as? Date
+        lastCheck = Demo.active ? nil : d.object(forKey: Self.lastCheckKey) as? Date
+        guard !Demo.active else { return }
         // A short delay keeps start-up quiet; afterwards look again every few hours whether a day has passed.
         DispatchQueue.main.asyncAfter(deadline: .now() + 15) { [weak self] in self?.checkIfDue() }
         timer = Timer.scheduledTimer(withTimeInterval: 4 * 3600, repeats: true) { [weak self] _ in

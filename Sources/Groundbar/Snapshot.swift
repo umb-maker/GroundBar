@@ -19,6 +19,8 @@ enum Snapshot {
             ("settings-shortcuts", { SettingsWindow.select(.shortcuts) }),
             ("settings-permissions", { SettingsWindow.select(.permissions) }),
             ("settings-about", { SettingsWindow.select(.about) }),
+            ("toast", { c.closeFlyout(); c.showToast(title: L("Screenshot saved and copied to the clipboard"),
+                                                     detail: "Screenshot 2026-11-09 at 10.00.00.png", symbol: "camera.viewfinder") {} }),
             ("preview", { c.closeFlyout(); c.showDemoPreview() }),
         ]
         // GROUNDBAR_SNAPSHOT_STEPS=bar,start limits the run to those steps.
@@ -30,7 +32,8 @@ enum Snapshot {
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 let windows = NSApp.windows.filter { $0.isVisible && $0.frame.width > 0 }
                 let target = steps[i].0 == "bar" ? windows.first { $0 is BarPanel && $0.frame.height == TaskbarController.barHeight }
-                    : steps[i].0 == "preview" ? windows.first { $0 is BarPanel && $0.frame.height != TaskbarController.barHeight }
+                    : steps[i].0 == "toast" ? windows.first { $0 is BarPanel && $0.frame.height == 64 }
+                    : steps[i].0 == "preview" ? windows.first { $0 is BarPanel && $0.frame.height != TaskbarController.barHeight && $0.frame.height != 64 }
                     : steps[i].0 == "welcome" ? WelcomeWindow.window
                     : steps[i].0.hasPrefix("settings") ? SettingsWindow.window
                     : windows.first { $0 is FlyoutPanel }
@@ -75,6 +78,13 @@ extension TaskbarController {
 enum Demo {
     static let active = ProcessInfo.processInfo.environment["GROUNDBAR_DEMO"] == "1"
     static let userName = "Alex Appleseed"
+    /// A fixed moment for demo timestamps.
+    static let date = Date(timeIntervalSince1970: 1_793_000_000)
+    /// A smooth, fixed Bitcoin price series (96 points) for demo snapshots.
+    static let bitcoinSeries: [Double] = (0..<96).map { i in
+        let t = Double(i) / 95
+        return 62_000 + 2_400 * t + 900 * sin(t * 9) + 350 * sin(t * 31)
+    }
     static let pins = ["com.apple.finder", "com.apple.Safari", "com.apple.mail", "com.apple.iCal", "com.apple.Notes",
                        "com.apple.Music", "com.apple.Photos", "com.apple.systempreferences"]
     static let recentApps = ["com.apple.Safari", "com.apple.mail", "com.apple.Notes", "com.apple.iCal", "com.apple.Photos",
