@@ -21,12 +21,10 @@ final class TaskbarController {
         }
     }
     let preview = PreviewModel()
+    private(set) lazy var flyouts = FlyoutPresenter(screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance },
+                                                    willOpen: { [unowned self] in hidePreview() })
     private(set) lazy var toast = ToastPresenter(screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance })
 
-    private var flyout: FlyoutPanel?
-    private(set) var flyoutKind: String?
-    private var outsideClickMonitor: Any?
-    private var keyMonitor: Any?
     private var previewPanel: BarPanel?
     private var previewAnchor: CGRect = .zero
     private var previewHovered = false
@@ -51,10 +49,10 @@ final class TaskbarController {
 
         let hk = HotKeyCenter.shared
         for (i, code) in HotKeyCenter.digitKeyCodes.enumerated() {
-            hk.register(keyCode: code) { [weak self] in self?.closeFlyout(); self?.model.activate(index: i) }
+            hk.register(keyCode: code) { [weak self] in self?.flyouts.close(); self?.model.activate(index: i) }
         }
         hk.register(keyCode: HotKeyCenter.space) { [weak self] in self?.toggleStart() }
-        hk.register(keyCode: HotKeyCenter.d) { [weak self] in self?.closeFlyout(); self?.model.toggleDesktop() }
+        hk.register(keyCode: HotKeyCenter.d) { [weak self] in self?.flyouts.close(); self?.model.toggleDesktop() }
 
         fullScreen.start(displays: { [unowned self] in Array(bars.keys) })
     }
@@ -116,7 +114,7 @@ final class TaskbarController {
             guard hide != hiddenForFullScreen.contains(id) else { continue }
             if hide {
                 hiddenForFullScreen.insert(id)
-                closeFlyout()
+                flyouts.close()
                 hidePreview()
                 panel.orderOut(nil)
             } else {
@@ -131,7 +129,7 @@ final class TaskbarController {
     }
 
     private func applyTheme(_ theme: ThemeMode) {
-        (Array(bars.values) + [flyout, previewPanel].compactMap { $0 }).forEach { $0.appearance = theme.appearance }
+        (Array(bars.values) + [flyouts.panel, previewPanel].compactMap { $0 }).forEach { $0.appearance = theme.appearance }
     }
 
     /// Converts a rect in a bar's SwiftUI global space (top-left origin) to screen coordinates,
@@ -145,7 +143,7 @@ final class TaskbarController {
 
     /// With several windows the click opens the window picker (like Windows) instead of activating the app.
     func click(_ item: TaskItem, rect: CGRect) {
-        closeFlyout()
+        flyouts.close()
         if let app = item.app, !app.isTerminated, model.windowCount(app) > 1 {
             if previewSticky && preview.app == app { hidePreview(); return }
             showTimer?.invalidate()
@@ -161,68 +159,14 @@ final class TaskbarController {
         model.click(item)
     }
 
-    // MARK: Flyouts
-
-    enum Anchor { case center(CGFloat), right(CGFloat), left(CGFloat) }
-
-    func toggleFlyout<V: View>(_ kind: String, anchor: Anchor, size: CGSize, @ViewBuilder content: () -> V) {
-        if flyoutKind == kind { closeFlyout(); return }
-        closeFlyout()
-        hidePreview()
-
-        let s = screen.frame
-        var x: CGFloat
-        switch anchor {
-        case .center(let mid): x = mid - size.width / 2
-        case .right(let edge): x = edge - size.width
-        case .left(let edge): x = edge
-        }
-        x = min(max(x, s.minX + 12), s.maxX - size.width - 12)
-        let height = min(size.height, s.height - Self.barHeight - 40)
-        let target = NSRect(x: x, y: s.minY + Self.barHeight + 12, width: size.width, height: height)
-
-        let p = FlyoutPanel(contentRect: target, styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
-        configure(p)
-        p.hasShadow = true
-        p.contentView = NSHostingView(rootView: content())
-        // With Reduce Motion the flyout fades in place instead of sliding up.
-        p.setFrame(Decor.reduceMotion ? target : target.offsetBy(dx: 0, dy: -24), display: false)
-        p.alphaValue = 0
-        p.makeKeyAndOrderFront(nil)
-        NSAnimationContext.runAnimationGroup { ctx in
-            ctx.duration = 0.16
-            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            p.animator().setFrame(target, display: true)
-            p.animator().alphaValue = 1
-        }
-        flyout = p
-        flyoutKind = kind
-
-        outsideClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { _ in
-            MainActor.assumeIsolated { TaskbarController.shared.closeFlyout() }
-        }
-        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            if event.keyCode == 53 { MainActor.assumeIsolated { TaskbarController.shared.closeFlyout() }; return nil }
-            return event
-        }
-    }
-
-    func closeFlyout() {
-        if let m = outsideClickMonitor { NSEvent.removeMonitor(m) }
-        if let m = keyMonitor { NSEvent.removeMonitor(m) }
-        outsideClickMonitor = nil
-        keyMonitor = nil
-        flyout?.orderOut(nil)
-        flyout = nil
-        flyoutKind = nil
-    }
+    // MARK: Start
 
     func toggleStart() {
         let s = screen.frame
-        let anchor: Anchor = model.centered ? .center(s.midX) : .left(s.minX + 12)
+        let anchor: FlyoutPresenter.Anchor = model.centered ? .center(s.midX) : .left(s.minX + 12)
         catalog.reload()
         files.refreshRecent()
-        toggleFlyout("start", anchor: anchor, size: CGSize(width: 640, height: 720)) {
+        flyouts.toggle("start", anchor: anchor, size: CGSize(width: 640, height: 720)) {
             StartMenuView(model: model, catalog: catalog, files: files)
         }
     }
@@ -232,7 +176,7 @@ final class TaskbarController {
     func hoverBegan(_ item: TaskItem, rect: CGRect) {
         if previewSticky { return }
         hideTimer?.invalidate()
-        guard flyout == nil, let app = item.app, !app.isTerminated else { return }
+        guard flyouts.openKind == nil, let app = item.app, !app.isTerminated else { return }
         let anchor = screenRect(fromBar: rect)
         if previewPanel != nil {
             showPreview(app: app, item: item, anchor: anchor)

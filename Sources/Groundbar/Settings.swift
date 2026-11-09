@@ -37,7 +37,7 @@ enum SettingsWindow {
     private static let tabKey = "settingsTab"
 
     static func show() {
-        TaskbarController.shared.closeFlyout()
+        TaskbarController.shared.flyouts.close()
         if let window {
             NSApp.activate(ignoringOtherApps: true)
             window.makeKeyAndOrderFront(nil)

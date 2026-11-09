@@ -292,7 +292,7 @@ struct StartMenuView: View {
     }
 
     private func open(_ entry: AppEntry) {
-        TaskbarController.shared.closeFlyout()
+        TaskbarController.shared.flyouts.close()
         TaskbarModel.launch(entry.url)
     }
 
@@ -300,7 +300,7 @@ struct StartMenuView: View {
         switch hit {
         case .app(let entry): open(entry)
         case .file(let entry):
-            TaskbarController.shared.closeFlyout()
+            TaskbarController.shared.flyouts.close()
             FileIndex.open(entry)
         }
     }
@@ -309,13 +309,13 @@ struct StartMenuView: View {
 @MainActor
 enum Power {
     static func run(_ command: String) {
-        TaskbarController.shared.closeFlyout()
+        TaskbarController.shared.flyouts.close()
         var error: NSDictionary?
         NSAppleScript(source: "tell application \"System Events\" to \(command)")?.executeAndReturnError(&error)
     }
 
     static func lock() {
-        TaskbarController.shared.closeFlyout()
+        TaskbarController.shared.flyouts.close()
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/pmset")
         p.arguments = ["displaysleepnow"]

@@ -6,7 +6,7 @@ import SwiftUI
 enum ScreenCapture {
     static func capture(region: Bool) {
         let c = TaskbarController.shared
-        c.closeFlyout()
+        c.flyouts.close()
         c.hidePreview()
         let url = folder().appendingPathComponent(fileName())
         let p = Process()

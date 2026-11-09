@@ -12,10 +12,10 @@ enum Snapshot {
         let allSteps: [(String, () -> Void)] = [
             ("bar", {}),
             ("start", { c.toggleStart() }),
-            ("calendar", { c.closeFlyout(); c.toggleFlyout("calendar", anchor: .right(.greatestFiniteMagnitude), size: CGSize(width: 340, height: 440)) { CalendarFlyout() } }),
-            ("quick", { c.closeFlyout(); c.toggleFlyout("quick", anchor: .right(.greatestFiniteMagnitude), size: CGSize(width: 360, height: 220)) { QuickSettingsView(status: c.status, model: c.model) } }),
-            ("btc", { c.closeFlyout(); c.toggleFlyout("btc", anchor: .left(8), size: CGSize(width: 380, height: 340)) { CryptoFlyout(ticker: c.crypto) } }),
-            ("welcome", { c.closeFlyout(); c.hidePreview(); WelcomeWindow.show() }),
+            ("calendar", { c.flyouts.close(); c.flyouts.toggle("calendar", anchor: .right(.greatestFiniteMagnitude), size: CGSize(width: 340, height: 440)) { CalendarFlyout() } }),
+            ("quick", { c.flyouts.close(); c.flyouts.toggle("quick", anchor: .right(.greatestFiniteMagnitude), size: CGSize(width: 360, height: 220)) { QuickSettingsView(status: c.status, model: c.model) } }),
+            ("btc", { c.flyouts.close(); c.flyouts.toggle("btc", anchor: .left(8), size: CGSize(width: 380, height: 340)) { CryptoFlyout(ticker: c.crypto) } }),
+            ("welcome", { c.flyouts.close(); c.hidePreview(); WelcomeWindow.show() }),
             ("settings", { WelcomeWindow.close(); c.updater.check(); SettingsWindow.show() }),
             ("settings-general", { SettingsWindow.select(.general) }),
             ("settings-appearance", { SettingsWindow.select(.appearance) }),
@@ -23,9 +23,9 @@ enum Snapshot {
             ("settings-shortcuts", { SettingsWindow.select(.shortcuts) }),
             ("settings-permissions", { SettingsWindow.select(.permissions) }),
             ("settings-about", { SettingsWindow.select(.about) }),
-            ("toast", { c.closeFlyout(); c.toast.show(title: L("Screenshot saved and copied to the clipboard"),
+            ("toast", { c.flyouts.close(); c.toast.show(title: L("Screenshot saved and copied to the clipboard"),
                                                      detail: "Screenshot 2026-11-09 at 10.00.00.png", symbol: "camera.viewfinder") {} }),
-            ("preview", { c.closeFlyout(); c.showDemoPreview() }),
+            ("preview", { c.flyouts.close(); c.showDemoPreview() }),
         ]
         // GROUNDBAR_SNAPSHOT_STEPS=bar,start limits the run to those steps.
         let only = ProcessInfo.processInfo.environment["GROUNDBAR_SNAPSHOT_STEPS"].map { Set($0.split(separator: ",").map(String.init)) }

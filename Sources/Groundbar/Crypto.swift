@@ -200,7 +200,7 @@ struct CryptoWidget: View {
         let color = trendColor(ticker.change24h)
         Button {
             let r = TaskbarController.shared.screenRect(fromBar: frame)
-            TaskbarController.shared.toggleFlyout("btc", anchor: .left(r.minX), size: CGSize(width: 380, height: 340)) {
+            TaskbarController.shared.flyouts.toggle("btc", anchor: .left(r.minX), size: CGSize(width: 380, height: 340)) {
                 CryptoFlyout(ticker: ticker)
             }
         } label: {
@@ -289,7 +289,7 @@ struct CryptoFlyout: View {
                     .font(.system(size: 10)).foregroundStyle(f.secondary)
                 Spacer()
                 Button("Open on CoinGecko") {
-                    TaskbarController.shared.closeFlyout()
+                    TaskbarController.shared.flyouts.close()
                     TaskbarController.openSettings("https://www.coingecko.com/it/monete/bitcoin")
                 }
                 .foregroundStyle(f.accent)

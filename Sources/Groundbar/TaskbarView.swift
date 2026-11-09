@@ -218,7 +218,7 @@ private struct TrayButton: View {
         Button {
             status.refresh()
             let r = TaskbarController.shared.screenRect(fromBar: frame)
-            TaskbarController.shared.toggleFlyout("quick", anchor: .right(r.maxX + 120), size: CGSize(width: 360, height: 220)) {
+            TaskbarController.shared.flyouts.toggle("quick", anchor: .right(r.maxX + 120), size: CGSize(width: 360, height: 220)) {
                 QuickSettingsView(status: status, model: TaskbarController.shared.model)
             }
         } label: {
@@ -255,7 +255,7 @@ private struct ShowDesktopStrip: View {
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
         .onTapGesture {
-            TaskbarController.shared.closeFlyout()
+            TaskbarController.shared.flyouts.close()
             model.toggleDesktop()
         }
         .help("Show desktop (⌃⌥D)")
