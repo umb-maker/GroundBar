@@ -2,7 +2,8 @@ import AppKit
 import Combine
 import SwiftUI
 
-/// Owns the windows: bar, flyouts and the hover preview.
+/// The composition root: owns the stores, one bar per display, the hotkeys and the task-button clicks,
+/// and hands flyouts, window lists, notices and full-screen detection to their presenters.
 @MainActor
 final class TaskbarController {
     static let shared = TaskbarController()
@@ -15,23 +16,22 @@ final class TaskbarController {
     let crypto = CryptoTicker()
     let updater = Updater()
 
+    // The panels above the bar, each in its own file. They open on the display under the mouse.
+    private(set) lazy var flyouts: FlyoutPresenter = FlyoutPresenter(
+        screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance },
+        willOpen: { [unowned self] in previews.hide() })
+    private(set) lazy var previews: PreviewPresenter = PreviewPresenter(
+        screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance },
+        canShow: { [unowned self] in flyouts.openKind == nil })
+    private(set) lazy var toast: ToastPresenter = ToastPresenter(
+        screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance })
+
     private init() {
         model.onDocuments = { app, documents in
             TaskbarController.shared.files.observe(app: app, documents: documents)
         }
     }
-    let preview = PreviewModel()
-    private(set) lazy var flyouts = FlyoutPresenter(screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance },
-                                                    willOpen: { [unowned self] in hidePreview() })
-    private(set) lazy var toast = ToastPresenter(screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance })
 
-    private var previewPanel: BarPanel?
-    private var previewAnchor: CGRect = .zero
-    private var previewHovered = false
-    private var previewSticky = false
-    private var previewClickMonitor: Any?
-    private var showTimer: Timer?
-    private var hideTimer: Timer?
     private var bag: Set<AnyCancellable> = []
 
     // MARK: Setup
@@ -45,7 +45,6 @@ final class TaskbarController {
         }
         model.$theme.sink { [weak self] theme in self?.applyTheme(theme) }.store(in: &bag)
         model.$barOnAllScreens.dropFirst().sink { [weak self] _ in DispatchQueue.main.async { self?.layoutBars() } }.store(in: &bag)
-        preview.$windows.sink { [weak self] _ in DispatchQueue.main.async { self?.positionPreview() } }.store(in: &bag)
 
         let hk = HotKeyCenter.shared
         for (i, code) in HotKeyCenter.digitKeyCodes.enumerated() {
@@ -115,7 +114,7 @@ final class TaskbarController {
             if hide {
                 hiddenForFullScreen.insert(id)
                 flyouts.close()
-                hidePreview()
+                previews.hide()
                 panel.orderOut(nil)
             } else {
                 hiddenForFullScreen.remove(id)
@@ -129,7 +128,7 @@ final class TaskbarController {
     }
 
     private func applyTheme(_ theme: ThemeMode) {
-        (Array(bars.values) + [flyouts.panel, previewPanel].compactMap { $0 }).forEach { $0.appearance = theme.appearance }
+        (Array(bars.values) + [flyouts.panel, previews.panel].compactMap { $0 }).forEach { $0.appearance = theme.appearance }
     }
 
     /// Converts a rect in a bar's SwiftUI global space (top-left origin) to screen coordinates,
@@ -145,17 +144,10 @@ final class TaskbarController {
     func click(_ item: TaskItem, rect: CGRect) {
         flyouts.close()
         if let app = item.app, !app.isTerminated, model.windowCount(app) > 1 {
-            if previewSticky && preview.app == app { hidePreview(); return }
-            showTimer?.invalidate()
-            hideTimer?.invalidate()
-            showPreview(app: app, item: item, anchor: screenRect(fromBar: rect))
-            previewSticky = true
-            previewClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { _ in
-                MainActor.assumeIsolated { TaskbarController.shared.hidePreview() }
-            }
+            previews.togglePicker(app: app, item: item, anchor: screenRect(fromBar: rect))
             return
         }
-        hidePreview()
+        previews.hide()
         model.click(item)
     }
 
@@ -169,81 +161,6 @@ final class TaskbarController {
         flyouts.toggle("start", anchor: anchor, size: CGSize(width: 640, height: 720)) {
             StartMenuView(model: model, catalog: catalog, files: files)
         }
-    }
-
-    // MARK: Hover previews
-
-    func hoverBegan(_ item: TaskItem, rect: CGRect) {
-        if previewSticky { return }
-        hideTimer?.invalidate()
-        guard flyouts.openKind == nil, let app = item.app, !app.isTerminated else { return }
-        let anchor = screenRect(fromBar: rect)
-        if previewPanel != nil {
-            showPreview(app: app, item: item, anchor: anchor)
-            return
-        }
-        showTimer?.invalidate()
-        showTimer = Timer.scheduledTimer(withTimeInterval: 0.45, repeats: false) { _ in
-            MainActor.assumeIsolated { TaskbarController.shared.showPreview(app: app, item: item, anchor: anchor) }
-        }
-    }
-
-    func hoverEnded() {
-        showTimer?.invalidate()
-        scheduleHide()
-    }
-
-    func previewHover(_ inside: Bool) {
-        previewHovered = inside
-        if inside { hideTimer?.invalidate() } else { scheduleHide() }
-    }
-
-    private func scheduleHide() {
-        hideTimer?.invalidate()
-        hideTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { _ in
-            MainActor.assumeIsolated {
-                let c = TaskbarController.shared
-                if !c.previewHovered && !c.previewSticky { c.hidePreview() }
-            }
-        }
-    }
-
-    private func showPreview(app: NSRunningApplication, item: TaskItem, anchor: CGRect) {
-        preview.load(app: app, name: item.name, icon: item.icon)
-        showPreviewPanel(anchor: anchor)
-    }
-
-    func showPreviewPanel(anchor: CGRect) {
-        previewAnchor = anchor
-        if previewPanel == nil {
-            let p = BarPanel(contentRect: .zero, styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
-            configure(p)
-            p.hasShadow = true
-            p.contentView = NSHostingView(rootView: PreviewView(model: preview))
-            previewPanel = p
-        }
-        positionPreview()
-        previewPanel?.orderFrontRegardless()
-    }
-
-    private func positionPreview() {
-        guard let p = previewPanel else { return }
-        let size = preview.panelSize
-        let s = screen.frame
-        let x = min(max(previewAnchor.midX - size.width / 2, s.minX + 8), s.maxX - size.width - 8)
-        p.setFrame(NSRect(x: x, y: s.minY + Self.barHeight + 8, width: size.width, height: size.height), display: true)
-    }
-
-    func hidePreview() {
-        if let m = previewClickMonitor { NSEvent.removeMonitor(m) }
-        previewClickMonitor = nil
-        previewSticky = false
-        showTimer?.invalidate()
-        hideTimer?.invalidate()
-        previewHovered = false
-        previewPanel?.orderOut(nil)
-        previewPanel = nil
-        preview.clear()
     }
 
     // MARK: Misc

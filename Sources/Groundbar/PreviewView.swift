@@ -86,7 +86,7 @@ final class PreviewModel: ObservableObject {
     func focus(_ card: Card) {
         guard let app else { return }
         let window = card.window
-        TaskbarController.shared.hidePreview()
+        TaskbarController.shared.previews.hide()
         WindowService.focus(window, of: app)
     }
 
@@ -121,7 +121,7 @@ struct PreviewView: View {
                     Text("Groundbar needs the Accessibility permission to list windows.")
                         .font(.system(size: 11)).foregroundStyle(f.secondary).fixedSize(horizontal: false, vertical: true)
                     Button("Open Accessibility Settings") {
-                        TaskbarController.shared.hidePreview()
+                        TaskbarController.shared.previews.hide()
                         TaskbarController.openSettings("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
                     }
                     .buttonStyle(.link).font(.system(size: 11))
@@ -164,7 +164,7 @@ struct PreviewView: View {
             }
         }
         .flyoutChrome()
-        .onHover { TaskbarController.shared.previewHover($0) }
+        .onHover { TaskbarController.shared.previews.pointerInside($0) }
     }
 }
 

@@ -15,7 +15,7 @@ enum Snapshot {
             ("calendar", { c.flyouts.close(); c.flyouts.toggle("calendar", anchor: .right(.greatestFiniteMagnitude), size: CGSize(width: 340, height: 440)) { CalendarFlyout() } }),
             ("quick", { c.flyouts.close(); c.flyouts.toggle("quick", anchor: .right(.greatestFiniteMagnitude), size: CGSize(width: 360, height: 220)) { QuickSettingsView(status: c.status, model: c.model) } }),
             ("btc", { c.flyouts.close(); c.flyouts.toggle("btc", anchor: .left(8), size: CGSize(width: 380, height: 340)) { CryptoFlyout(ticker: c.crypto) } }),
-            ("welcome", { c.flyouts.close(); c.hidePreview(); WelcomeWindow.show() }),
+            ("welcome", { c.flyouts.close(); c.previews.hide(); WelcomeWindow.show() }),
             ("settings", { WelcomeWindow.close(); c.updater.check(); SettingsWindow.show() }),
             ("settings-general", { SettingsWindow.select(.general) }),
             ("settings-appearance", { SettingsWindow.select(.appearance) }),
@@ -75,8 +75,8 @@ extension TaskbarController {
                       document: URL(fileURLWithPath: "/tmp/\(n)"), minimized: i == 3)
         }
         let icon = NSWorkspace.shared.icon(forFile: "/System/Applications/TextEdit.app")
-        preview.loadStatic(docs, name: "Microsoft Word", icon: icon)
-        showPreviewPanel(anchor: CGRect(x: 700, y: 0, width: 44, height: 40))
+        previews.model.loadStatic(docs, name: "Microsoft Word", icon: icon)
+        previews.showPanel(anchor: CGRect(x: 700, y: 0, width: 44, height: 40))
     }
 }
 

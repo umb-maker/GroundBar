@@ -7,7 +7,7 @@ enum ScreenCapture {
     static func capture(region: Bool) {
         let c = TaskbarController.shared
         c.flyouts.close()
-        c.hidePreview()
+        c.previews.hide()
         let url = folder().appendingPathComponent(fileName())
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")

@@ -175,7 +175,8 @@ private struct TaskButton: View {
         })
         .onHover { inside in
             hovering = inside
-            if inside { TaskbarController.shared.hoverBegan(item, rect: frame) } else { TaskbarController.shared.hoverEnded() }
+            let c = TaskbarController.shared
+            if inside { c.previews.hoverBegan(item, anchor: c.screenRect(fromBar: frame)) } else { c.previews.hoverEnded() }
         }
         .help(item.isRunning ? "" : item.name + (index < 9 ? "  (⌃⌥\(index + 1))" : ""))
         .contextMenu {
