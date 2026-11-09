@@ -15,20 +15,43 @@ struct AppWindow: Identifiable {
 }
 
 /// Window enumeration (ScreenCaptureKit / Accessibility) and window control (Accessibility).
+struct WindowScan: Sendable {
+    let windowCount: Int
+    let displays: Set<CGDirectDisplayID>
+    let documents: [URL]
+}
+
+/// Scans apps' windows on a background queue, one scan at a time, and hands the results back on the
+/// main thread. Accessibility calls are IPC to other apps: a slow or hung app must never stall the bar.
+enum WindowScanner {
+    private static let queue = DispatchQueue(label: "app.groundbar.window-scan", qos: .utility)
+
+    static func scan(_ pids: [pid_t], completion: @escaping @MainActor ([pid_t: WindowScan]) -> Void) {
+        queue.async {
+            var results: [pid_t: WindowScan] = [:]
+            for pid in pids { results[pid] = WindowService.scan(pid: pid) }
+            DispatchQueue.main.async { MainActor.assumeIsolated { completion(results) } }
+        }
+    }
+}
+
 @MainActor
 enum WindowService {
     // MARK: Accessibility helpers
 
     /// Apps already asked to build their accessibility tree (done once per process).
-    private static var awakened = Set<pid_t>()
+    /// Touched from the background scan and from user actions, so guarded by a lock.
+    nonisolated(unsafe) private static var awakened = Set<pid_t>()
+    nonisolated private static let awakenedLock = NSLock()
 
-    static func axWindows(pid: pid_t) -> [AXUIElement] {
+    nonisolated static func axWindows(pid: pid_t) -> [AXUIElement] {
         let app = AXUIElementCreateApplication(pid)
-        // The bar polls every app: never let a hung app block it for the default 6 s.
+        // Never let a hung app block a scan for the default 6 s.
         AXUIElementSetMessagingTimeout(app, 0.25)
         var value: CFTypeRef?
         var error = AXUIElementCopyAttributeValue(app, kAXWindowsAttribute as CFString, &value)
-        if (error != .success || (value as? [AXUIElement])?.isEmpty != false), awakened.insert(pid).inserted {
+        let empty = error != .success || (value as? [AXUIElement])?.isEmpty != false
+        if empty, awakenedLock.withLock({ awakened.insert(pid).inserted }) {
             // Some apps (e.g. Microsoft Office) only build their accessibility tree once an assistive client asks for it.
             AXUIElementSetAttributeValue(app, "AXManualAccessibility" as CFString, kCFBooleanTrue)
             AXUIElementSetAttributeValue(app, "AXEnhancedUserInterface" as CFString, kCFBooleanTrue)
@@ -42,43 +65,34 @@ enum WindowService {
         }
     }
 
-    /// Called on every poll with the files shown in the app's windows (feeds the recent-documents history).
-    static var onDocuments: ((NSRunningApplication, [URL]) -> Void)?
-
-    /// Whether the app has at least one window (minimised included). Without Accessibility we cannot
-    /// tell, so every running app counts as having one.
-    static func hasWindows(_ app: NSRunningApplication) -> Bool {
-        guard AXIsProcessTrusted() else { return true }
-        let windows = axWindows(pid: app.processIdentifier)
-        let documents = windows.compactMap { string($0, kAXDocumentAttribute).flatMap { URL(string: $0) } }.filter(\.isFileURL)
-        onDocuments?(app, documents)
-        windowDisplays[app.processIdentifier] = Set(windows.compactMap { frame($0).flatMap(display(containing:)) })
-        return !windows.isEmpty
+    /// Window state of one app: how many windows (minimised included), on which displays, showing which files.
+    /// Runs on `WindowScanner`'s background queue: Accessibility calls wait on the other app.
+    nonisolated static func scan(pid: pid_t) -> WindowScan {
+        let windows = axWindows(pid: pid)
+        return WindowScan(
+            windowCount: windows.count,
+            displays: Set(windows.compactMap { frame($0).flatMap(display(containing:)) }),
+            documents: windows.compactMap { string($0, kAXDocumentAttribute).flatMap { URL(string: $0) } }.filter(\.isFileURL))
     }
 
-    /// Displays showing each app's windows, refreshed by `hasWindows` on every poll.
-    private static var windowDisplays: [pid_t: Set<CGDirectDisplayID>] = [:]
-
-    static func displays(of pid: pid_t) -> Set<CGDirectDisplayID> { windowDisplays[pid] ?? [] }
-
     /// The display holding the centre of a window frame (global coordinates, top-left origin).
-    private static func display(containing frame: CGRect) -> CGDirectDisplayID? {
+    nonisolated private static func display(containing frame: CGRect) -> CGDirectDisplayID? {
         var id: CGDirectDisplayID = 0
         var count: UInt32 = 0
         guard CGGetDisplaysWithPoint(CGPoint(x: frame.midX, y: frame.midY), 1, &id, &count) == .success, count > 0 else { return nil }
         return id
     }
 
-    static func attribute(_ el: AXUIElement, _ name: String) -> CFTypeRef? {
+    nonisolated static func attribute(_ el: AXUIElement, _ name: String) -> CFTypeRef? {
         var value: CFTypeRef?
         return AXUIElementCopyAttributeValue(el, name as CFString, &value) == .success ? value : nil
     }
 
-    static func string(_ el: AXUIElement, _ name: String) -> String? { attribute(el, name) as? String }
+    nonisolated static func string(_ el: AXUIElement, _ name: String) -> String? { attribute(el, name) as? String }
 
-    static func bool(_ el: AXUIElement, _ name: String) -> Bool? { (attribute(el, name) as? NSNumber)?.boolValue }
+    nonisolated static func bool(_ el: AXUIElement, _ name: String) -> Bool? { (attribute(el, name) as? NSNumber)?.boolValue }
 
-    static func frame(_ el: AXUIElement) -> CGRect? {
+    nonisolated static func frame(_ el: AXUIElement) -> CGRect? {
         guard let p = attribute(el, kAXPositionAttribute), let s = attribute(el, kAXSizeAttribute) else { return nil }
         var point = CGPoint.zero
         var size = CGSize.zero
@@ -174,10 +188,6 @@ enum WindowService {
         }
     }
 
-    /// Number of standard windows, cheap enough to call on every click.
-    static func windowCount(of app: NSRunningApplication) -> Int {
-        AXIsProcessTrusted() ? axWindows(pid: app.processIdentifier).count : 0
-    }
 
     static func thumbnail(_ window: SCWindow, maxSize: CGSize) async -> NSImage? {
         let filter = SCContentFilter(desktopIndependentWindow: window)

@@ -43,6 +43,7 @@ final class Updater: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 4 * 3600, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.checkIfDue() }
         }
+        timer?.tolerance = 600
     }
 
     private func checkIfDue() {

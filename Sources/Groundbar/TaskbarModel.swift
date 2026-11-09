@@ -58,6 +58,13 @@ final class TaskbarModel: ObservableObject {
     private var desktopToggledAt = Date.distantPast
     private var observers: [NSObjectProtocol] = []
     private var pollTimer: Timer?
+    /// Latest background window scan per process (see `WindowScanner`).
+    private var scans: [pid_t: WindowScan] = [:]
+    private var scanning = false
+    private var policyCache: [pid_t: Bool] = [:]
+    private var policyCacheDate = Date.distantPast
+    /// Called after each scan with the files shown in each app's windows (feeds the recent-documents history).
+    var onDocuments: ((NSRunningApplication, [URL]) -> Void)?
 
     static let defaultPins = ["com.apple.finder", "com.apple.Safari", "com.apple.mail", "com.apple.iCal", "com.apple.systempreferences"]
 
@@ -87,8 +94,10 @@ final class TaskbarModel: ObservableObject {
         refresh()
         // Windows open and close without any workspace notification, so poll for them.
         pollTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.refresh() }
+            MainActor.assumeIsolated { self?.scanWindows() }
         }
+        pollTimer?.tolerance = 0.3
+        scanWindows()
     }
 
     private func workspaceChanged(_ note: Notification) {
@@ -100,7 +109,52 @@ final class TaskbarModel: ObservableObject {
             if !hiddenForDesktop.isEmpty, Date().timeIntervalSince(desktopToggledAt) > 1.5 { hiddenForDesktop = [] }
         }
         refresh()
+        scanWindows()
     }
+
+    /// Reads every running app's windows on a background queue, then refreshes the bar from the results.
+    /// Without Accessibility there is nothing to read: every app counts as having windows.
+    private func scanWindows() {
+        guard AXIsProcessTrusted(), !Demo.active, !scanning else { return }
+        scanning = true
+        let apps = regularApps()
+        WindowScanner.scan(apps.map(\.processIdentifier)) { [weak self] results in
+            guard let self else { return }
+            self.scanning = false
+            self.scans = results
+            for app in apps { if let docs = results[app.processIdentifier]?.documents { self.onDocuments?(app, docs) } }
+            self.refresh()
+        }
+    }
+
+    /// Running apps with a Dock presence (activation policy "regular"), other than Groundbar.
+    /// `activationPolicy` asks another process each time and there are hundreds of processes, so the
+    /// policy is cached per process and re-read every 30 seconds (an app can turn regular after launch).
+    private func regularApps() -> [NSRunningApplication] {
+        if Date().timeIntervalSince(policyCacheDate) > 30 {
+            policyCache = [:]
+            policyCacheDate = Date()
+        }
+        let own = getpid()
+        return NSWorkspace.shared.runningApplications.filter { app in
+            let pid = app.processIdentifier
+            guard pid != own else { return false }
+            if let regular = policyCache[pid] { return regular }
+            let regular = app.activationPolicy == .regular
+            policyCache[pid] = regular
+            return regular
+        }
+    }
+
+    /// Whether the app has a window (minimised included), from the latest scan. Unknown apps (just launched,
+    /// or no Accessibility) count as having one, so their button doesn't flicker.
+    private func hasWindows(_ app: NSRunningApplication) -> Bool {
+        guard AXIsProcessTrusted() else { return true }
+        return (scans[app.processIdentifier]?.windowCount ?? 1) > 0
+    }
+
+    /// Number of windows from the latest scan (0 when unknown).
+    func windowCount(_ app: NSRunningApplication) -> Int { scans[app.processIdentifier]?.windowCount ?? 0 }
 
     // MARK: Items
 
@@ -110,9 +164,7 @@ final class TaskbarModel: ObservableObject {
 
     func refresh() {
         let ws = NSWorkspace.shared
-        let running = ws.runningApplications.filter {
-            $0.activationPolicy == .regular && $0.processIdentifier != getpid() && !$0.isTerminated
-        }
+        let running = regularApps()
         let front = ws.frontmostApplication?.processIdentifier
         let activePID = (front == getpid() || front == nil) ? lastActivePID : front
 
@@ -127,7 +179,7 @@ final class TaskbarModel: ObservableObject {
             result.append(makeItem(id: id, url: url, app: app, pinned: true, activePID: activePID))
         }
         // Like Windows, an app that is not pinned only has a button while it has windows.
-        for app in running where !Demo.active && !used.contains(app.processIdentifier) && WindowService.hasWindows(app) {
+        for app in running where !Demo.active && !used.contains(app.processIdentifier) && hasWindows(app) {
             result.append(makeItem(id: Self.key(for: app), url: app.bundleURL, app: app, pinned: false, activePID: activePID))
         }
         if result != items { items = result }
@@ -143,9 +195,9 @@ final class TaskbarModel: ObservableObject {
         }
         let name = app?.localizedName ?? url.map { Self.displayName($0) } ?? id
         let active = app != nil && app?.processIdentifier == activePID && app?.isHidden == false
-        let windows = app.map { pinned ? WindowService.hasWindows($0) : true } ?? false
+        let windows = app.map { pinned ? hasWindows($0) : true } ?? false
         return TaskItem(id: id, name: name, icon: icon, url: url, app: app, pinned: pinned, isActive: active, hasWindows: windows,
-                        displays: app.map { WindowService.displays(of: $0.processIdentifier) } ?? [])
+                        displays: app.map { scans[$0.processIdentifier]?.displays ?? [] } ?? [])
     }
 
     nonisolated static func displayName(_ url: URL) -> String {

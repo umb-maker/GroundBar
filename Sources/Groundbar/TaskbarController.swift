@@ -28,7 +28,7 @@ final class TaskbarController {
     let updater = Updater()
 
     private init() {
-        WindowService.onDocuments = { app, documents in
+        model.onDocuments = { app, documents in
             TaskbarController.shared.files.observe(app: app, documents: documents)
         }
     }
@@ -135,10 +135,31 @@ final class TaskbarController {
         fullScreenTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             MainActor.assumeIsolated { TaskbarController.shared.updateFullScreen() }
         }
+        fullScreenTimer?.tolerance = 0.3
     }
 
+    /// Reads the window list off the main thread, then hides or shows each display's bar.
     func updateFullScreen() {
-        let covered = displaysCoveredByFrontApp()
+        guard !checkingFullScreen else { return }
+        // Groundbar itself in front (a flyout or Settings): keep the bars as they are.
+        guard let front = NSWorkspace.shared.frontmostApplication?.processIdentifier, front != getpid() else { return }
+        checkingFullScreen = true
+        let displays = Array(bars.keys)
+        DispatchQueue.global(qos: .utility).async {
+            let covered = Self.displaysCovered(by: front, among: displays)
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    let c = TaskbarController.shared
+                    c.checkingFullScreen = false
+                    c.apply(covered: covered)
+                }
+            }
+        }
+    }
+
+    private var checkingFullScreen = false
+
+    private func apply(covered: Set<CGDirectDisplayID>) {
         for (id, panel) in bars {
             let hide = covered.contains(id)
             guard hide != hiddenForFullScreen.contains(id) else { continue }
@@ -154,18 +175,17 @@ final class TaskbarController {
         }
     }
 
-    /// Displays filled by an on-screen window of the frontmost app (window bounds and display bounds are
-    /// both in global coordinates with a top-left origin).
-    private func displaysCoveredByFrontApp() -> Set<CGDirectDisplayID> {
-        guard let front = NSWorkspace.shared.frontmostApplication, front.processIdentifier != getpid() else { return [] }
+    /// Displays filled by an on-screen window of the given app (window bounds and display bounds are
+    /// both in global coordinates with a top-left origin). Safe on any thread.
+    nonisolated private static func displaysCovered(by pid: pid_t, among displays: [CGDirectDisplayID]) -> Set<CGDirectDisplayID> {
         let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
         let frames = windows.compactMap { w -> CGRect? in
-            guard (w[kCGWindowOwnerPID as String] as? pid_t) == front.processIdentifier,
+            guard (w[kCGWindowOwnerPID as String] as? pid_t) == pid,
                   (w[kCGWindowLayer as String] as? Int) == 0,
                   let bounds = w[kCGWindowBounds as String] as? NSDictionary else { return nil }
             return CGRect(dictionaryRepresentation: bounds)
         }
-        return Set(bars.keys.filter { id in
+        return Set(displays.filter { id in
             let d = CGDisplayBounds(id)
             return frames.contains { r in
                 r.minX <= d.minX + 1 && r.minY <= d.minY + 1 && r.maxX >= d.maxX - 1 && r.maxY >= d.maxY - 1
@@ -201,7 +221,7 @@ final class TaskbarController {
     /// With several windows the click opens the window picker (like Windows) instead of activating the app.
     func click(_ item: TaskItem, rect: CGRect) {
         closeFlyout()
-        if let app = item.app, !app.isTerminated, WindowService.windowCount(of: app) > 1 {
+        if let app = item.app, !app.isTerminated, model.windowCount(app) > 1 {
             if previewSticky && preview.app == app { hidePreview(); return }
             showTimer?.invalidate()
             hideTimer?.invalidate()

@@ -30,12 +30,22 @@ final class SystemStatus: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.refresh() }
         }
+        timer?.tolerance = 3
     }
 
+    /// Volume and battery are read off the main thread: CoreAudio and IOKit ask other processes.
     func refresh() {
-        if let v = Audio.volume() { volume = v }
-        muted = Audio.isMuted()
-        readBattery()
+        DispatchQueue.global(qos: .utility).async {
+            let volume = Audio.volume(), muted = Audio.isMuted(), battery = Self.readBattery()
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    if let volume { self.volume = volume }
+                    self.muted = muted
+                    self.batteryLevel = battery.level
+                    self.charging = battery.charging
+                }
+            }
+        }
     }
 
     func setVolume(_ v: Float) {
@@ -49,21 +59,17 @@ final class SystemStatus: ObservableObject {
         Audio.setMuted(m)
     }
 
-    private func readBattery() {
+    nonisolated private static func readBattery() -> (level: Int?, charging: Bool) {
         guard let info = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
-              let list = IOPSCopyPowerSourcesList(info)?.takeRetainedValue() as? [CFTypeRef] else {
-            batteryLevel = nil
-            return
-        }
+              let list = IOPSCopyPowerSourcesList(info)?.takeRetainedValue() as? [CFTypeRef] else { return (nil, false) }
         for source in list {
             guard let d = IOPSGetPowerSourceDescription(info, source)?.takeUnretainedValue() as? [String: Any],
                   d[kIOPSTypeKey] as? String == kIOPSInternalBatteryType,
                   let cur = d[kIOPSCurrentCapacityKey] as? Int, let max = d[kIOPSMaxCapacityKey] as? Int, max > 0 else { continue }
-            batteryLevel = cur * 100 / max
-            charging = (d[kIOPSIsChargingKey] as? Bool ?? false) || d[kIOPSPowerSourceStateKey] as? String == kIOPSACPowerValue
-            return
+            let charging = (d[kIOPSIsChargingKey] as? Bool ?? false) || d[kIOPSPowerSourceStateKey] as? String == kIOPSACPowerValue
+            return (cur * 100 / max, charging)
         }
-        batteryLevel = nil
+        return (nil, false)
     }
 
     var networkSymbol: String {
@@ -87,8 +93,7 @@ final class SystemStatus: ObservableObject {
     }
 }
 
-/// CoreAudio volume of the default output device.
-@MainActor
+/// CoreAudio volume of the default output device. Stateless, safe on any thread.
 enum Audio {
     private static func device() -> AudioObjectID {
         var id = AudioObjectID(0)

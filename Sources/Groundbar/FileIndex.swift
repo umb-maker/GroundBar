@@ -49,6 +49,7 @@ final class FileIndex: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.refreshRecent() }
         }
+        timer?.tolerance = 10
     }
 
     // MARK: Recent

@@ -31,6 +31,7 @@ final class PermissionState: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.refresh() }
         }
+        timer?.tolerance = 0.3
     }
 
     func refresh() {

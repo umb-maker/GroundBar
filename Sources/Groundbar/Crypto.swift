@@ -38,6 +38,7 @@ final class CryptoTicker: ObservableObject {
     }
 
     private var timer: Timer?
+    private var retryPending = false
     private static let base = "https://api.coingecko.com/api/v3"
     nonisolated private static let currencyKey = "btcCurrency"
     nonisolated static let currencies = ["eur", "usd"]
@@ -69,6 +70,7 @@ final class CryptoTicker: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.refresh() }
         }
+        timer?.tolerance = 15
     }
 
     func refresh() {
@@ -88,8 +90,15 @@ final class CryptoTicker: ObservableObject {
                 failed = false
             } else {
                 failed = price == nil
-                // Usually a rate limit (HTTP 429): try again soon instead of waiting for the next tick.
-                DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in self?.refresh() }
+                // Usually a rate limit (HTTP 429): try again soon instead of waiting for the next tick,
+                // but keep a single pending retry so failures don't pile up into parallel chains.
+                if !retryPending {
+                    retryPending = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
+                        self?.retryPending = false
+                        self?.refresh()
+                    }
+                }
             }
             if !c.isEmpty {
                 sparkline = c
