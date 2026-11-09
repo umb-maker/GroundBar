@@ -3,7 +3,11 @@ import AppKit
 /// Debug aid: `Groundbar --snapshot <dir>` writes PNGs of the bar and flyouts, then quits.
 @MainActor
 enum Snapshot {
+    /// True during `--snapshot`: the pictures must not depend on the front app or the mouse.
+    private(set) static var running = false
+
     static func run(to dir: String) {
+        running = true
         let c = TaskbarController.shared
         let allSteps: [(String, () -> Void)] = [
             ("bar", {}),
@@ -29,6 +33,8 @@ enum Snapshot {
         func step(_ i: Int) {
             guard i < steps.count else { NSApp.terminate(nil); return }
             steps[i].1()
+            // Ignore the real mouse, so a pointer resting over a panel adds no hover highlight.
+            NSApp.windows.forEach { $0.ignoresMouseEvents = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                 let windows = NSApp.windows.filter { $0.isVisible && $0.frame.width > 0 }
                 let target = steps[i].0 == "bar" ? windows.first { $0 is BarPanel && $0.frame.height == TaskbarController.barHeight }

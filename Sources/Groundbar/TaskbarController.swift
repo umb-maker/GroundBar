@@ -140,7 +140,7 @@ final class TaskbarController {
 
     /// Reads the window list off the main thread, then hides or shows each display's bar.
     func updateFullScreen() {
-        guard !checkingFullScreen else { return }
+        guard !checkingFullScreen, !Snapshot.running else { return }
         // Groundbar itself in front (a flyout or Settings): keep the bars as they are.
         guard let front = NSWorkspace.shared.frontmostApplication?.processIdentifier, front != getpid() else { return }
         checkingFullScreen = true
