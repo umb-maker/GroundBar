@@ -10,12 +10,14 @@ struct TaskItem: Identifiable, Equatable {
     var pinned: Bool
     var isActive: Bool
     var hasWindows: Bool
+    /// Displays showing the app's windows (empty when unknown, e.g. without Accessibility).
+    var displays: Set<CGDirectDisplayID> = []
 
     var isRunning: Bool { app.map { !$0.isTerminated } ?? false }
 
     static func == (a: TaskItem, b: TaskItem) -> Bool {
         a.id == b.id && a.app?.processIdentifier == b.app?.processIdentifier
-            && a.pinned == b.pinned && a.isActive == b.isActive && a.hasWindows == b.hasWindows
+            && a.pinned == b.pinned && a.isActive == b.isActive && a.hasWindows == b.hasWindows && a.displays == b.displays
     }
 }
 
@@ -31,6 +33,13 @@ final class TaskbarModel: ObservableObject {
     }
     @Published var centered: Bool {
         didSet { UserDefaults.standard.set(centered, forKey: "centered") }
+    }
+    @Published var barOnAllScreens: Bool {
+        didSet { UserDefaults.standard.set(barOnAllScreens, forKey: "barOnAllScreens") }
+    }
+    /// With a bar on every display, each bar lists the apps whose windows are on that display.
+    @Published var appsOnOwnScreen: Bool {
+        didSet { UserDefaults.standard.set(appsOnOwnScreen, forKey: "appsOnOwnScreen") }
     }
     @Published var showCrypto: Bool {
         didSet {
@@ -58,6 +67,8 @@ final class TaskbarModel: ObservableObject {
         theme = ThemeMode(rawValue: d.string(forKey: "theme") ?? "") ?? .system
         centered = d.object(forKey: "centered") as? Bool ?? true
         showCrypto = d.object(forKey: "showCrypto") as? Bool ?? true
+        barOnAllScreens = d.object(forKey: "barOnAllScreens") as? Bool ?? true
+        appsOnOwnScreen = d.object(forKey: "appsOnOwnScreen") as? Bool ?? true
         showScreenshotButtons = d.object(forKey: "showScreenshotButtons") as? Bool ?? true
         Fluent.theme = theme
 
@@ -133,7 +144,8 @@ final class TaskbarModel: ObservableObject {
         let name = app?.localizedName ?? url.map { Self.displayName($0) } ?? id
         let active = app != nil && app?.processIdentifier == activePID && app?.isHidden == false
         let windows = app.map { pinned ? WindowService.hasWindows($0) : true } ?? false
-        return TaskItem(id: id, name: name, icon: icon, url: url, app: app, pinned: pinned, isActive: active, hasWindows: windows)
+        return TaskItem(id: id, name: name, icon: icon, url: url, app: app, pinned: pinned, isActive: active, hasWindows: windows,
+                        displays: app.map { WindowService.displays(of: $0.processIdentifier) } ?? [])
     }
 
     nonisolated static func displayName(_ url: URL) -> String {

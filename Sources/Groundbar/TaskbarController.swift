@@ -34,7 +34,6 @@ final class TaskbarController {
     }
     let preview = PreviewModel()
 
-    private var bar: BarPanel!
     private var flyout: FlyoutPanel?
     private(set) var flyoutKind: String?
     private var outsideClickMonitor: Any?
@@ -52,17 +51,13 @@ final class TaskbarController {
 
     func start() {
         catalog.reload()
-        bar = BarPanel(contentRect: .zero, styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
-        configure(bar)
-        bar.hasShadow = false
-        bar.contentView = NSHostingView(rootView: TaskbarView(model: model, status: status))
-        layoutBar()
-        bar.orderFrontRegardless()
+        layoutBars()
 
         NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { _ in
-            MainActor.assumeIsolated { TaskbarController.shared.layoutBar() }
+            MainActor.assumeIsolated { TaskbarController.shared.layoutBars() }
         }
         model.$theme.sink { [weak self] theme in self?.applyTheme(theme) }.store(in: &bag)
+        model.$barOnAllScreens.dropFirst().sink { [weak self] _ in DispatchQueue.main.async { self?.layoutBars() } }.store(in: &bag)
         preview.$windows.sink { [weak self] _ in DispatchQueue.main.async { self?.positionPreview() } }.store(in: &bag)
 
         let hk = HotKeyCenter.shared
@@ -75,13 +70,59 @@ final class TaskbarController {
         watchFullScreen()
     }
 
+    // MARK: Displays
+
+    /// One bar per display (or only the main one, per Settings), keyed by display id.
+    private var bars: [CGDirectDisplayID: BarPanel] = [:]
+
+    static func displayID(of screen: NSScreen) -> CGDirectDisplayID {
+        (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value ?? CGMainDisplayID()
+    }
+
+    /// Creates, moves or removes bars to match the connected displays; called at launch, when displays
+    /// change and when the "all displays" setting changes.
+    func layoutBars() {
+        let wanted = model.barOnAllScreens ? NSScreen.screens : Array(NSScreen.screens.prefix(1))
+        let ids = Set(wanted.map(Self.displayID))
+        for (id, panel) in bars where !ids.contains(id) {
+            panel.orderOut(nil)
+            bars[id] = nil
+            hiddenForFullScreen.remove(id)
+        }
+        for screen in wanted {
+            let id = Self.displayID(of: screen)
+            let panel = bars[id] ?? makeBar(display: id)
+            bars[id] = panel
+            let f = screen.frame
+            panel.setFrame(NSRect(x: f.minX, y: f.minY, width: f.width, height: Self.barHeight), display: true)
+            if !hiddenForFullScreen.contains(id) { panel.orderFrontRegardless() }
+        }
+    }
+
+    private func makeBar(display: CGDirectDisplayID) -> BarPanel {
+        let panel = BarPanel(contentRect: .zero, styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
+        configure(panel)
+        panel.hasShadow = false
+        panel.contentView = NSHostingView(rootView: TaskbarView(model: model, status: status, display: display))
+        return panel
+    }
+
+    /// The display the user is working on: the bar under the mouse, where clicks and hovers happen
+    /// (hotkeys follow the mouse too). Flyouts, previews and notices open there.
+    private var screen: NSScreen {
+        let mouse = NSEvent.mouseLocation
+        let withBar = NSScreen.screens.filter { bars[Self.displayID(of: $0)] != nil }
+        return withBar.first { NSMouseInRect(mouse, $0.frame, false) } ?? NSScreen.screens.first ?? NSScreen.main!
+    }
+
     // MARK: Full screen
 
-    private var hiddenForFullScreen = false
+    /// Displays whose bar is hidden because the frontmost app fills them.
+    private var hiddenForFullScreen = Set<CGDirectDisplayID>()
     private var fullScreenTimer: Timer?
 
-    /// Hides the bar while the frontmost app fills the screen. Native full screen already lives in its own
-    /// Space (where the bar isn't shown); this also covers apps that just make a screen-sized window.
+    /// Hides a display's bar while the frontmost app fills that display. Native full screen already lives in
+    /// its own Space (where the bar isn't shown); this also covers apps that just make a screen-sized window.
     private func watchFullScreen() {
         let nc = NSWorkspace.shared.notificationCenter
         for name in [NSWorkspace.activeSpaceDidChangeNotification, NSWorkspace.didActivateApplicationNotification] {
@@ -97,31 +138,39 @@ final class TaskbarController {
     }
 
     func updateFullScreen() {
-        let covered = frontAppCoversScreen()
-        guard covered != hiddenForFullScreen else { return }
-        hiddenForFullScreen = covered
-        if covered {
-            closeFlyout()
-            hidePreview()
-            bar.orderOut(nil)
-        } else {
-            bar.orderFrontRegardless()
+        let covered = displaysCoveredByFrontApp()
+        for (id, panel) in bars {
+            let hide = covered.contains(id)
+            guard hide != hiddenForFullScreen.contains(id) else { continue }
+            if hide {
+                hiddenForFullScreen.insert(id)
+                closeFlyout()
+                hidePreview()
+                panel.orderOut(nil)
+            } else {
+                hiddenForFullScreen.remove(id)
+                panel.orderFrontRegardless()
+            }
         }
     }
 
-    /// Whether the frontmost app has an on-screen window as large as the main screen
-    /// (window bounds and screen frame both start at the top-left of the main screen).
-    private func frontAppCoversScreen() -> Bool {
-        guard let front = NSWorkspace.shared.frontmostApplication, front.processIdentifier != getpid() else { return false }
-        let s = screen.frame
+    /// Displays filled by an on-screen window of the frontmost app (window bounds and display bounds are
+    /// both in global coordinates with a top-left origin).
+    private func displaysCoveredByFrontApp() -> Set<CGDirectDisplayID> {
+        guard let front = NSWorkspace.shared.frontmostApplication, front.processIdentifier != getpid() else { return [] }
         let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
-        return windows.contains { w in
+        let frames = windows.compactMap { w -> CGRect? in
             guard (w[kCGWindowOwnerPID as String] as? pid_t) == front.processIdentifier,
                   (w[kCGWindowLayer as String] as? Int) == 0,
-                  let bounds = w[kCGWindowBounds as String] as? NSDictionary,
-                  let r = CGRect(dictionaryRepresentation: bounds) else { return false }
-            return r.minX <= 1 && r.minY <= 1 && r.width >= s.width - 1 && r.height >= s.height - 1
+                  let bounds = w[kCGWindowBounds as String] as? NSDictionary else { return nil }
+            return CGRect(dictionaryRepresentation: bounds)
         }
+        return Set(bars.keys.filter { id in
+            let d = CGDisplayBounds(id)
+            return frames.contains { r in
+                r.minX <= d.minX + 1 && r.minY <= d.minY + 1 && r.maxX >= d.maxX - 1 && r.maxY >= d.maxY - 1
+            }
+        })
     }
 
     private func configure(_ p: NSPanel) {
@@ -136,21 +185,15 @@ final class TaskbarController {
         p.appearance = model.theme.appearance
     }
 
-    private var screen: NSScreen { NSScreen.screens.first ?? NSScreen.main! }
-
-    func layoutBar() {
-        let f = screen.frame
-        bar.setFrame(NSRect(x: f.minX, y: f.minY, width: f.width, height: Self.barHeight), display: true)
-    }
-
     private func applyTheme(_ theme: ThemeMode) {
-        [bar, flyout, previewPanel].compactMap { $0 }.forEach { $0.appearance = theme.appearance }
+        (Array(bars.values) + [flyout, previewPanel].compactMap { $0 }).forEach { $0.appearance = theme.appearance }
     }
 
-    /// Converts a rect in the bar's SwiftUI global space (top-left origin) to screen coordinates.
+    /// Converts a rect in a bar's SwiftUI global space (top-left origin) to screen coordinates,
+    /// for the bar under the mouse.
     func screenRect(fromBar r: CGRect) -> CGRect {
-        let f = bar.frame
-        return CGRect(x: f.minX + r.minX, y: f.maxY - r.maxY, width: r.width, height: r.height)
+        let f = screen.frame
+        return CGRect(x: f.minX + r.minX, y: f.minY + Self.barHeight - r.maxY, width: r.width, height: r.height)
     }
 
     // MARK: Task buttons

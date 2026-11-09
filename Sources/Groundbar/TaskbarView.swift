@@ -5,8 +5,20 @@ import UniformTypeIdentifiers
 struct TaskbarView: View {
     @ObservedObject var model: TaskbarModel
     @ObservedObject var status: SystemStatus
+    /// The display this bar sits on.
+    let display: CGDirectDisplayID
     @Environment(\.colorScheme) private var scheme
     @Local private var dropTargeted = false
+
+    /// Items shown on this bar, with their index in the full list (used by the ⌃⌥1…9 shortcuts).
+    /// Pinned apps are on every bar; with "apps on their own display" the others only on the display
+    /// of their windows.
+    private var visibleItems: [(index: Int, item: TaskItem)] {
+        let perDisplay = model.barOnAllScreens && model.appsOnOwnScreen && NSScreen.screens.count > 1
+        return model.items.enumerated().map { ($0.offset, $0.element) }.filter { _, item in
+            !perDisplay || item.pinned || item.displays.isEmpty || item.displays.contains(display)
+        }
+    }
 
     var body: some View {
         let f = Fluent(scheme)
@@ -22,8 +34,8 @@ struct TaskbarView: View {
             HStack(spacing: 4) {
                 if model.centered { Spacer(minLength: 0) }
                 StartButton()
-                ForEach(Array(model.items.enumerated()), id: \.element.id) { index, item in
-                    TaskButton(item: item, index: index, model: model)
+                ForEach(visibleItems, id: \.item.id) { entry in
+                    TaskButton(item: entry.item, index: entry.index, model: model)
                 }
                 Spacer(minLength: 0)
             }

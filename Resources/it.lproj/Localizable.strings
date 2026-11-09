@@ -102,6 +102,9 @@
 "General" = "Generale";
 "Dock" = "Dock";
 "Taskbar" = "Barra";
+"Displays" = "Schermi";
+"Show the bar on all displays" = "Mostra la barra su tutti gli schermi";
+"Show apps on the display where their windows are" = "Mostra le app sullo schermo in cui sono aperte le loro finestre";
 "Show the Bitcoin widget" = "Mostra il widget Bitcoin";
 "Currency" = "Valuta";
 "Euro (€)" = "Euro (€)";

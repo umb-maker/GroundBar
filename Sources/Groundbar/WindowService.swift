@@ -52,7 +52,21 @@ enum WindowService {
         let windows = axWindows(pid: app.processIdentifier)
         let documents = windows.compactMap { string($0, kAXDocumentAttribute).flatMap { URL(string: $0) } }.filter(\.isFileURL)
         onDocuments?(app, documents)
+        windowDisplays[app.processIdentifier] = Set(windows.compactMap { frame($0).flatMap(display(containing:)) })
         return !windows.isEmpty
+    }
+
+    /// Displays showing each app's windows, refreshed by `hasWindows` on every poll.
+    private static var windowDisplays: [pid_t: Set<CGDirectDisplayID>] = [:]
+
+    static func displays(of pid: pid_t) -> Set<CGDirectDisplayID> { windowDisplays[pid] ?? [] }
+
+    /// The display holding the centre of a window frame (global coordinates, top-left origin).
+    private static func display(containing frame: CGRect) -> CGDirectDisplayID? {
+        var id: CGDirectDisplayID = 0
+        var count: UInt32 = 0
+        guard CGGetDisplaysWithPoint(CGPoint(x: frame.midX, y: frame.midY), 1, &id, &count) == .success, count > 0 else { return nil }
+        return id
     }
 
     static func attribute(_ el: AXUIElement, _ name: String) -> CFTypeRef? {

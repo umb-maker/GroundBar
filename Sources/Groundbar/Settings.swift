@@ -51,6 +51,12 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Displays") {
+                Toggle("Show the bar on all displays", isOn: $model.barOnAllScreens)
+                Toggle("Show apps on the display where their windows are", isOn: $model.appsOnOwnScreen)
+                    .disabled(!model.barOnAllScreens)
+            }
+
             Section("Taskbar") {
                 Toggle("Show the Bitcoin widget", isOn: $model.showCrypto)
                 Picker("Currency", selection: $ticker.currency) {

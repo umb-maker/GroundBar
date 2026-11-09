@@ -24,7 +24,8 @@ Available in **English** and **Italian**: Groundbar follows the language set in 
 - **Themes**: System, Light, Dark, **Halloween** 🎃, **Christmas** 🎄 (falling snow, twinkling lights) and **Santa** 🎅 (a night sky with Santa's sleigh flying across the bar).
 - **Global shortcuts**: ⌃⌥1…9 opens the n-th app, ⌃⌥Space opens Start, ⌃⌥D shows the desktop.
 - **Launch at login**, from the bar's right-click menu.
-- **Settings window**: theme, icon layout, Bitcoin widget and currency (EUR/USD), screenshot buttons, shortcuts, updates.
+- **Multiple displays**: a bar on every display, each listing the apps whose windows are on it (pinned apps on all). Bars appear and disappear as you connect displays; Start and previews open on the display you click.
+- **Settings window**: theme, icon layout, displays, Bitcoin widget and currency (EUR/USD), screenshot buttons, shortcuts, updates.
 - **Update notices**: Groundbar checks GitHub once a day and tells you when a new version is out (it never installs anything by itself).
 
 | Document list | Bitcoin | Quick settings |
@@ -81,7 +82,6 @@ With ad-hoc signing, macOS may ask for the permissions again after every rebuild
 - Tabs inside one window (e.g. several PDFs in tabs) appear as a single document.
 - Only windows on the current Space are listed.
 - Other apps' menu bar icons don't appear in the tray.
-- The bar is shown on the main display only.
 - To read the windows of some apps (e.g. Microsoft Office), Groundbar turns on their accessibility interface; in rare cases this can slow down window animations in those apps.
 
 ## Development

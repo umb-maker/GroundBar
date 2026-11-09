@@ -24,7 +24,8 @@ Disponibile in **italiano** e **inglese**: Groundbar segue la lingua impostata i
 - **Temi**: Sistema, Chiaro, Scuro, **Halloween** 🎃, **Natale** 🎄 (neve che scende e lucine) e **Babbo Natale** 🎅 (cielo notturno con la slitta che attraversa la barra).
 - **Scorciatoie**: ⌃⌥1…9 apre l'app n-esima, ⌃⌥Spazio apre Start, ⌃⌥D mostra il desktop.
 - **Avvio automatico** con il Mac, da attivare dal menu del clic destro sulla barra.
-- **Finestra Impostazioni**: tema, disposizione delle icone, widget Bitcoin e valuta (EUR/USD), pulsanti screenshot, scorciatoie, aggiornamenti.
+- **Più schermi**: una barra su ogni monitor, ognuna con le app che hanno finestre su quel monitor (le app fissate su tutte). Le barre compaiono e spariscono quando colleghi o scolleghi uno schermo; Start e anteprime si aprono sullo schermo dove clicchi.
+- **Finestra Impostazioni**: tema, disposizione delle icone, schermi, widget Bitcoin e valuta (EUR/USD), pulsanti screenshot, scorciatoie, aggiornamenti.
 - **Avvisi di aggiornamento**: una volta al giorno Groundbar controlla su GitHub e ti avvisa quando esce una nuova versione (non installa mai niente da sola).
 
 | Elenco documenti | Bitcoin | Impostazioni rapide |
@@ -81,7 +82,6 @@ Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. 
 - Le schede dentro una stessa finestra (per esempio più PDF a schede) compaiono come un solo documento.
 - Vengono elencate solo le finestre della scrivania (Spazio) corrente.
 - Le icone della barra dei menu di altre app non compaiono nella tray.
-- La barra compare solo sullo schermo principale.
 - Per leggere le finestre di alcune app (per esempio Microsoft Office), Groundbar attiva la loro interfaccia di accessibilità; in rari casi questo può rallentare le animazioni delle finestre di quelle app.
 
 ## Sviluppo
