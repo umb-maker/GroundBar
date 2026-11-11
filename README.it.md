@@ -21,7 +21,7 @@ Disponibile in **italiano** e **inglese**: Groundbar segue la lingua impostata i
 - **Widget Bitcoin**: prezzo in euro, variazione e grafico delle 24 ore. Con un clic si apre un grafico da 24 ore a 1 anno (dati CoinGecko).
 - **Impostazioni rapide**: rete, volume, batteria, tema.
 - **Mostra desktop**, sul bordo destro della barra.
-- **Temi**: Sistema, Chiaro, Scuro, **Halloween** 🎃, **Natale** 🎄 (neve che scende e lucine) e **Babbo Natale** 🎅 (cielo notturno con la slitta che attraversa la barra).
+- **Temi**: Sistema, Chiaro, Scuro, **Liquid Glass** (il vetro di sistema, da macOS 26), **Halloween** 🎃, **Natale** 🎄 (neve che scende e lucine) e **Babbo Natale** 🎅 (cielo notturno con la slitta che attraversa la barra).
 - **Scorciatoie**: ⌃⌥1…9 apre l'app n-esima, ⌃⌥Spazio apre Start, ⌃⌥D mostra il desktop.
 - **Avvio automatico** con il Mac, da attivare dal menu del clic destro sulla barra.
 - **Più schermi**: una barra su ogni monitor, ognuna con le app che hanno finestre su quel monitor (le app fissate su tutte). Le barre compaiono e spariscono quando colleghi o scolleghi uno schermo; Start e anteprime si aprono sullo schermo dove clicchi.

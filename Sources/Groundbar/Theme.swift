@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 enum ThemeMode: String, CaseIterable, Identifiable {
-    case system, light, dark, halloween, christmas, santa
+    case system, light, dark, glass, halloween, christmas, santa
     var id: String { rawValue }
 
     var label: String {
@@ -10,6 +10,7 @@ enum ThemeMode: String, CaseIterable, Identifiable {
         case .system: L("System")
         case .light: L("Light")
         case .dark: L("Dark")
+        case .glass: "Liquid Glass"
         case .halloween: L("Halloween 🎃")
         case .christmas: L("Christmas 🎄")
         case .santa: L("Santa 🎅")
@@ -18,7 +19,7 @@ enum ThemeMode: String, CaseIterable, Identifiable {
 
     var appearance: NSAppearance? {
         switch self {
-        case .system: nil
+        case .system, .glass: nil
         case .light: NSAppearance(named: .aqua)
         case .dark, .halloween, .christmas, .santa: NSAppearance(named: .darkAqua)
         }
@@ -59,9 +60,12 @@ struct Fluent {
         text: Color(red: 0.97, green: 0.98, blue: 1.0))
 
     let dark: Bool
+    /// The Liquid Glass theme: the system's glass material with almost no tint, following light and dark.
+    let glass: Bool
     private let seasonal: Seasonal?
     init(_ scheme: ColorScheme) {
         dark = scheme == .dark
+        glass = Fluent.theme == .glass
         switch Fluent.theme {
         case .halloween: seasonal = Self.halloween
         case .christmas: seasonal = Self.christmas
@@ -72,16 +76,20 @@ struct Fluent {
 
     var barTint: Color {
         if let s = seasonal { return s.bar }
+        // Just enough tint to keep icons and text readable over a busy desktop.
+        if glass { return dark ? Color.black.opacity(0.14) : Color.white.opacity(0.12) }
         return dark ? Color(red: 0.11, green: 0.11, blue: 0.12).opacity(0.78) : Color(red: 0.93, green: 0.94, blue: 0.96).opacity(0.80)
     }
     var flyoutTint: Color {
         if let s = seasonal { return s.flyout }
+        if glass { return dark ? Color.black.opacity(0.22) : Color.white.opacity(0.22) }
         return dark ? Color(red: 0.16, green: 0.16, blue: 0.17).opacity(0.86) : Color(red: 0.95, green: 0.95, blue: 0.97).opacity(0.88)
     }
     var cardTint: Color { seasonal.map { $0.highlight.opacity(0.08) } ?? (dark ? Color.white.opacity(0.06) : Color.white.opacity(0.70)) }
     var hover: Color { seasonal.map { $0.highlight.opacity(0.14) } ?? (dark ? Color.white.opacity(0.08) : Color.black.opacity(0.05)) }
     var activeBg: Color { seasonal.map { $0.highlight.opacity(0.12) } ?? (dark ? Color.white.opacity(0.06) : Color.white.opacity(0.65)) }
-    var stroke: Color { seasonal.map { $0.highlight.opacity(0.30) } ?? (dark ? Color.white.opacity(0.09) : Color.black.opacity(0.08)) }
+    /// Glass draws its own bright edge, so the theme adds no border.
+    var stroke: Color { glass ? .clear : seasonal.map { $0.highlight.opacity(0.30) } ?? (dark ? Color.white.opacity(0.09) : Color.black.opacity(0.08)) }
     /// The Mac's own accent colour (System Settings › Appearance) in the System, Light and Dark themes,
     /// so the bar matches the system controls next to it; seasonal themes keep their own colours.
     var accent: Color { seasonal?.accent ?? Color(nsColor: .controlAccentColor) }
@@ -111,6 +119,34 @@ struct VisualEffect: NSViewRepresentable {
     func updateNSView(_ v: NSVisualEffectView, context: Context) { v.material = material }
 }
 
+/// The material behind the bar and the flyouts: Liquid Glass in the glass theme (macOS 26 and later;
+/// a light blur before that), the classic blur in every other theme.
+struct ThemedMaterial: View {
+    var material: NSVisualEffectView.Material
+    var radius: CGFloat = 0
+
+    var body: some View {
+        if Fluent.theme == .glass {
+            if #available(macOS 26, *) { GlassEffect(radius: radius) } else { VisualEffect(material: .fullScreenUI) }
+        } else {
+            VisualEffect(material: material)
+        }
+    }
+}
+
+@available(macOS 26, *)
+private struct GlassEffect: NSViewRepresentable {
+    var radius: CGFloat
+
+    func makeNSView(context: Context) -> NSGlassEffectView {
+        let v = NSGlassEffectView()
+        v.cornerRadius = radius
+        return v
+    }
+
+    func updateNSView(_ v: NSGlassEffectView, context: Context) { v.cornerRadius = radius }
+}
+
 /// Background, border and corners shared by every flyout (Start, calendar, quick settings, previews).
 struct FlyoutChrome: ViewModifier {
     @Environment(\.colorScheme) private var scheme
@@ -118,8 +154,10 @@ struct FlyoutChrome: ViewModifier {
 
     func body(content: Content) -> some View {
         let f = Fluent(scheme)
+        // Glass panels are rounder, like the system's own on macOS 26.
+        let radius = f.glass ? max(radius, 20) : radius
         content
-            .background(ZStack { VisualEffect(material: .popover); f.flyoutTint })
+            .background(ZStack { ThemedMaterial(material: .popover, radius: radius); f.flyoutTint })
             .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(f.stroke, lineWidth: 1))
     }

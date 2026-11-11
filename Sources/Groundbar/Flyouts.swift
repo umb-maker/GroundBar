@@ -19,7 +19,7 @@ struct QuickSettingsView: View {
                 Tile(symbol: "dot.radiowaves.left.and.right", label: "Bluetooth", on: false) {
                     TaskbarController.openSettings("x-apple.systempreferences:com.apple.BluetoothSettings")
                 }
-                Tile(symbol: model.theme == .santa ? "sparkles" : model.theme == .christmas ? "snowflake" : model.theme == .halloween ? "moon.stars.fill" : model.theme == .dark ? "moon.fill" : "sun.max.fill", label: L("Theme: \(model.theme.label)"), on: false) {
+                Tile(symbol: model.theme == .santa ? "sparkles" : model.theme == .christmas ? "snowflake" : model.theme == .halloween ? "moon.stars.fill" : model.theme == .dark ? "moon.fill" : model.theme == .glass ? "drop.fill" : "sun.max.fill", label: L("Theme: \(model.theme.label)"), on: false) {
                     let all = ThemeMode.allCases
                     model.theme = all[(all.firstIndex(of: model.theme)! + 1) % all.count]
                 }

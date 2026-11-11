@@ -23,7 +23,7 @@ struct TaskbarView: View {
     var body: some View {
         let f = Fluent(scheme)
         ZStack {
-            VisualEffect(material: .hudWindow)
+            ThemedMaterial(material: .hudWindow)
             f.barTint
             Rectangle().fill(f.stroke).frame(height: 1).frame(maxHeight: .infinity, alignment: .top)
             if model.theme == .halloween { HalloweenDecor() }
