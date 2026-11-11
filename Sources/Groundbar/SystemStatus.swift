@@ -27,9 +27,12 @@ final class SystemStatus: ObservableObject {
         }
         refresh()
         monitor.pathUpdateHandler = { [weak self] path in
+            // With a VPN on, the path runs through a tunnel (type .other): show the physical link under it,
+            // the first Wi-Fi or Ethernet interface the system lists as available.
+            let physical = path.availableInterfaces.first { $0.type == .wifi || $0.type == .wiredEthernet }?.type
             let kind: Net = path.status != .satisfied ? .offline
-                : path.usesInterfaceType(.wifi) ? .wifi
-                : path.usesInterfaceType(.wiredEthernet) ? .ethernet : .other
+                : path.usesInterfaceType(.wifi) || physical == .wifi ? .wifi
+                : path.usesInterfaceType(.wiredEthernet) || physical == .wiredEthernet ? .ethernet : .other
             Task { @MainActor in self?.network = kind }
         }
         monitor.start(queue: .main)
