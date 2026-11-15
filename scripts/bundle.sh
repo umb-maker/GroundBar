@@ -4,7 +4,8 @@
 #   ./scripts/bundle.sh            release build for this Mac's architecture
 #   ./scripts/bundle.sh universal  release build for Apple silicon + Intel
 #
-# Signing: ad-hoc by default. To keep macOS privacy permissions across rebuilds, sign with a stable
+# Signing: with the hardened runtime, so no other program can load code into Groundbar and borrow its
+# Accessibility and Screen Recording permissions. Ad-hoc by default. To keep macOS privacy permissions across rebuilds, sign with a stable
 # identity: set GROUNDBAR_SIGN_IDENTITY, or put GROUNDBAR_SIGN_IDENTITY="Your Identity" in
 # scripts/signing.local (ignored by git).
 set -e
@@ -38,8 +39,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleName</key><string>Groundbar</string>
   <key>CFBundleExecutable</key><string>Groundbar</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>0.5.0</string>
-  <key>CFBundleVersion</key><string>7</string>
+  <key>CFBundleShortVersionString</key><string>0.5.1</string>
+  <key>CFBundleVersion</key><string>8</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
@@ -49,9 +50,9 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 PLIST
 
 if [ -n "$GROUNDBAR_SIGN_IDENTITY" ] && security find-certificate -c "$GROUNDBAR_SIGN_IDENTITY" >/dev/null 2>&1; then
-  codesign --force --sign "$GROUNDBAR_SIGN_IDENTITY" "$APP"
+  codesign --force --options runtime --entitlements Resources/Groundbar.entitlements --sign "$GROUNDBAR_SIGN_IDENTITY" "$APP"
 else
-  codesign --force --sign - "$APP"
+  codesign --force --options runtime --entitlements Resources/Groundbar.entitlements --sign - "$APP"
   echo "Ad-hoc signature: macOS will ask for permissions again after every build (see GROUNDBAR_SIGN_IDENTITY)."
 fi
 echo "Built $APP"

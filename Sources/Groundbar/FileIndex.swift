@@ -1,4 +1,5 @@
 import AppKit
+import UniformTypeIdentifiers
 
 struct FileEntry: Identifiable, Hashable {
     var id: String { url.path }
@@ -42,7 +43,7 @@ final class FileIndex: ObservableObject {
     init() {
         if let data = UserDefaults.standard.data(forKey: Self.historyKey),
            let saved = try? JSONDecoder().decode([HistoryItem].self, from: data) {
-            history = saved
+            history = saved.filter { Self.isDocument(URL(fileURLWithPath: $0.path)) }
         }
         rebuild()
         refreshRecent()
@@ -67,9 +68,24 @@ final class FileIndex: ObservableObject {
         q.start()
     }
 
+    /// True for files with content (text, office documents, PDFs, images…); false for apps, scripts,
+    /// executables, installers, link files and anything else that does something when opened.
+    nonisolated static func isDocument(_ url: URL) -> Bool {
+        guard url.isFileURL,
+              let type = (try? url.resourceValues(forKeys: [.contentTypeKey]))?.contentType ?? UTType(filenameExtension: url.pathExtension)
+        else { return false }
+        if type.conforms(to: .executable) || type.conforms(to: .script) || type.conforms(to: .application) { return false }
+        return type.conforms(to: .content) || legacyOfficeTypes.contains(type.identifier)
+    }
+
+    /// Old Office formats that the system does not file under "content".
+    nonisolated private static let legacyOfficeTypes: Set<String> = ["com.microsoft.word.doc", "com.microsoft.powerpoint.ppt", "com.microsoft.excel.xls"]
+
     /// Records documents that just appeared in an app's windows.
     func observe(app: NSRunningApplication, documents: [URL]) {
-        let now = Set(documents.map(\.path))
+        // Another app decides what it reports as its open document: keep real documents only, so an
+        // app or a script can never land in the recent lists, where a click would run it.
+        let now = Set(documents.filter(Self.isDocument).map(\.path))
         let before = openByApp[app.processIdentifier] ?? []
         openByApp[app.processIdentifier] = now
         let opened = now.subtracting(before)

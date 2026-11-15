@@ -72,7 +72,7 @@ final class Updater: ObservableObject {
             lastCheck = now
             UserDefaults.standard.set(now, forKey: Self.lastCheckKey)
             let version = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
-            let url = (json["html_url"] as? String).flatMap(URL.init(string:)) ?? Self.releasesPage
+            let url = (json["html_url"] as? String).flatMap(URL.init(string:)).flatMap { Self.isReleaseLink($0) ? $0 : nil } ?? Self.releasesPage
             guard Self.isNewer(version, than: Self.currentVersion) else {
                 status = .upToDate
                 return
@@ -92,6 +92,12 @@ final class Updater: ObservableObject {
                                            symbol: "arrow.down.circle") {
             NSWorkspace.shared.open(release.url)
         }
+    }
+
+    /// Only a page of Groundbar's own repository on github.com, over HTTPS, is opened from an update notice.
+    nonisolated static func isReleaseLink(_ url: URL) -> Bool {
+        url.scheme == "https" && url.host == "github.com" && url.path.hasPrefix("/umb-maker/Groundbar/")
+            && url.user == nil && url.port == nil
     }
 
     /// Compares dotted version numbers ("0.10.1" > "0.9.3"); non-numeric parts count as 0.
