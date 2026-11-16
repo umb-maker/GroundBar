@@ -16,7 +16,10 @@ struct AppWindow: Identifiable {
 
 /// Window enumeration (ScreenCaptureKit / Accessibility) and window control (Accessibility).
 struct WindowScan: Sendable {
+    /// Windows on the Space in view (minimised included): the ones the window list can show.
     let windowCount: Int
+    /// Windows on other Spaces: another desktop, or an app in full screen.
+    let elsewhere: Int
     let displays: Set<CGDirectDisplayID>
     let documents: [URL]
 }
@@ -29,7 +32,8 @@ enum WindowScanner {
     static func scan(_ pids: [pid_t], completion: @escaping @MainActor ([pid_t: WindowScan]) -> Void) {
         queue.async {
             var results: [pid_t: WindowScan] = [:]
-            for pid in pids { results[pid] = WindowService.scan(pid: pid) }
+            let elsewhere = OtherSpaces.windows()
+            for pid in pids { results[pid] = WindowService.scan(pid: pid, elsewhere: elsewhere[pid] ?? []) }
             DispatchQueue.main.async { MainActor.assumeIsolated { completion(results) } }
         }
     }
@@ -67,11 +71,12 @@ enum WindowService {
 
     /// Window state of one app: how many windows (minimised included), on which displays, showing which files.
     /// Runs on `WindowScanner`'s background queue: Accessibility calls wait on the other app.
-    nonisolated static func scan(pid: pid_t) -> WindowScan {
+    nonisolated static func scan(pid: pid_t, elsewhere: [CGRect]) -> WindowScan {
         let windows = axWindows(pid: pid)
         return WindowScan(
             windowCount: windows.count,
-            displays: Set(windows.compactMap { frame($0).flatMap(display(containing:)) }),
+            elsewhere: elsewhere.count,
+            displays: Set((windows.compactMap { frame($0) } + elsewhere).compactMap(display(containing:))),
             documents: windows.compactMap { string($0, kAXDocumentAttribute).flatMap { URL(string: $0) } }.filter(\.isFileURL))
     }
 

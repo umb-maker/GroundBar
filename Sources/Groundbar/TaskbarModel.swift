@@ -150,11 +150,12 @@ final class TaskbarModel: ObservableObject {
         }
     }
 
-    /// Whether the app has a window (minimised included), from the latest scan. Unknown apps (just launched,
+    /// Whether the app has a window (minimised or on another Space included), from the latest scan. Unknown apps (just launched,
     /// or no Accessibility) count as having one, so their button doesn't flicker.
     private func hasWindows(_ app: NSRunningApplication) -> Bool {
         guard AXIsProcessTrusted() else { return true }
-        return (scans[app.processIdentifier]?.windowCount ?? 1) > 0
+        guard let scan = scans[app.processIdentifier] else { return true }
+        return scan.windowCount + scan.elsewhere > 0
     }
 
     /// Number of windows from the latest scan (0 when unknown).
