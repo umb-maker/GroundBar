@@ -27,7 +27,10 @@ to use and the appearance as closures from `TaskbarController`, so they never re
 - `PreviewPresenter`: the window list over a task button. Hover delay (0.45 s), hide delay (0.3 s),
   sticky picker on click. Owns `PreviewModel`.
 - `ToastPresenter`: the notice above the right end of the bar, six seconds or a click.
-- `FullScreenWatcher`: reports which displays the front app fills; the controller hides those bars.
+- `FullScreenWatcher`: reports which displays the front app fills (the controller hides those bars) and
+  where one of its windows reaches under the bar.
+- `BarAutoHider` (`AutoHide.swift`): the auto-hide setting. Decides per display whether the bar is tucked
+  away and brings it back when the pointer touches the bottom edge of the screen.
 
 Views and features reach the app through `TaskbarController.shared` (for example
 `TaskbarController.shared.flyouts.close()`).

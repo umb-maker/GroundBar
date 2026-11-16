@@ -19,7 +19,7 @@ final class TaskbarController {
     // The panels above the bar, each in its own file. They open on the display under the mouse.
     private(set) lazy var flyouts: FlyoutPresenter = FlyoutPresenter(
         screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance },
-        willOpen: { [unowned self] in previews.hide() })
+        willOpen: { [unowned self] in previews.hide(); autoHide.reveal(Self.displayID(of: screen)) })
     private(set) lazy var previews: PreviewPresenter = PreviewPresenter(
         screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance },
         canShow: { [unowned self] in flyouts.openKind == nil })
@@ -44,6 +44,7 @@ final class TaskbarController {
             MainActor.assumeIsolated { TaskbarController.shared.layoutBars() }
         }
         model.$theme.sink { [weak self] theme in self?.applyTheme(theme) }.store(in: &bag)
+        model.$autoHide.dropFirst().sink { [weak self] mode in self?.autoHide.mode = mode }.store(in: &bag)
         model.$barOnAllScreens.dropFirst().sink { [weak self] _ in DispatchQueue.main.async { self?.layoutBars() } }.store(in: &bag)
 
         let hk = HotKeyCenter.shared
@@ -74,14 +75,64 @@ final class TaskbarController {
             panel.orderOut(nil)
             bars[id] = nil
             hiddenForFullScreen.remove(id)
+            shownBars.remove(id)
         }
+        barFrames = [:]
         for screen in wanted {
             let id = Self.displayID(of: screen)
             let panel = bars[id] ?? makeBar(display: id)
             bars[id] = panel
             let f = screen.frame
-            panel.setFrame(NSRect(x: f.minX, y: f.minY, width: f.width, height: Self.barHeight), display: true)
-            if !hiddenForFullScreen.contains(id) { panel.orderFrontRegardless() }
+            let frame = NSRect(x: f.minX, y: f.minY, width: f.width, height: Self.barHeight)
+            barFrames[id] = frame
+            panel.setFrame(frame, display: true)
+        }
+        autoHide.layout(barFrames: barFrames)
+        refreshVisibility()
+    }
+
+    // MARK: Showing and hiding
+
+    /// Each bar's place on its display, in screen coordinates.
+    private var barFrames: [CGDirectDisplayID: NSRect] = [:]
+    /// Displays whose bar is on screen now.
+    private var shownBars = Set<CGDirectDisplayID>()
+    private lazy var autoHide: BarAutoHider = BarAutoHider(
+        mode: model.autoHide,
+        isBusy: { [unowned self] in flyouts.openKind != nil || previews.panel != nil },
+        onChange: { [unowned self] in refreshVisibility() })
+
+    /// Shows or hides each bar: out of sight while the front app fills its display, or while auto-hide
+    /// has tucked it away.
+    private func refreshVisibility() {
+        for (id, panel) in bars {
+            let show = !hiddenForFullScreen.contains(id) && !autoHide.isConcealed(id)
+            guard show != shownBars.contains(id), let frame = barFrames[id] else { continue }
+            // A short slide with the fade; with Reduce Motion only the fade.
+            let away = Decor.reduceMotion ? frame : frame.offsetBy(dx: 0, dy: -16)
+            if show {
+                shownBars.insert(id)
+                panel.setFrame(away, display: false)
+                panel.alphaValue = 0
+                panel.orderFrontRegardless()
+                NSAnimationContext.runAnimationGroup { ctx in
+                    ctx.duration = 0.15
+                    panel.animator().setFrame(frame, display: true)
+                    panel.animator().alphaValue = 1
+                }
+            } else {
+                shownBars.remove(id)
+                NSAnimationContext.runAnimationGroup({ ctx in
+                    ctx.duration = 0.15
+                    panel.animator().setFrame(away, display: true)
+                    panel.animator().alphaValue = 0
+                }, completionHandler: { [weak self] in
+                    MainActor.assumeIsolated {
+                        guard let self, !self.shownBars.contains(id) else { return }
+                        panel.orderOut(nil)
+                    }
+                })
+            }
         }
     }
 
@@ -105,22 +156,24 @@ final class TaskbarController {
 
     /// Displays whose bar is hidden because the frontmost app fills them.
     private var hiddenForFullScreen = Set<CGDirectDisplayID>()
-    private lazy var fullScreen = FullScreenWatcher { [unowned self] covered in apply(covered: covered) }
+    private lazy var fullScreen = FullScreenWatcher(barHeight: Self.barHeight) { [unowned self] covered, underBar in
+        apply(covered: covered)
+        autoHide.setOverlapping(underBar)
+    }
 
     private func apply(covered: Set<CGDirectDisplayID>) {
-        for (id, panel) in bars {
+        for id in bars.keys {
             let hide = covered.contains(id)
             guard hide != hiddenForFullScreen.contains(id) else { continue }
             if hide {
                 hiddenForFullScreen.insert(id)
                 flyouts.close()
                 previews.hide()
-                panel.orderOut(nil)
             } else {
                 hiddenForFullScreen.remove(id)
-                panel.orderFrontRegardless()
             }
         }
+        refreshVisibility()
     }
 
     private func configure(_ p: NSPanel) {

@@ -21,6 +21,7 @@ Available in **English** and **Italian**: Groundbar follows the language set in 
 - **Bitcoin widget**: price in euro, 24-hour change and sparkline. Click it for a chart from 24 hours to 1 year (data from CoinGecko).
 - **Quick settings**: network, volume, battery, theme.
 - **Show desktop** strip on the right edge.
+- **Auto-hide**: keep the bar always on screen, hide it until the pointer reaches the bottom edge, or hide it only while a window reaches under it.
 - **Themes**: System, Light, Dark, **Liquid Glass** (the system glass material on macOS 26 and later), **Halloween** 🎃, **Christmas** 🎄 (falling snow, twinkling lights) and **Santa** 🎅 (a night sky with Santa's sleigh flying across the bar).
 - **Global shortcuts**: ⌃⌥1…9 opens the n-th app, ⌃⌥Space opens Start, ⌃⌥D shows the desktop.
 - **Launch at login**, from the bar's right-click menu.

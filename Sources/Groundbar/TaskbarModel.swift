@@ -41,6 +41,9 @@ final class TaskbarModel: ObservableObject {
     @Published var appsOnOwnScreen: Bool {
         didSet { UserDefaults.standard.set(appsOnOwnScreen, forKey: "appsOnOwnScreen") }
     }
+    @Published var autoHide: AutoHideMode {
+        didSet { UserDefaults.standard.set(autoHide.rawValue, forKey: "autoHide") }
+    }
     @Published var showCrypto: Bool {
         didSet {
             UserDefaults.standard.set(showCrypto, forKey: "showCrypto")
@@ -77,6 +80,7 @@ final class TaskbarModel: ObservableObject {
         barOnAllScreens = d.object(forKey: "barOnAllScreens") as? Bool ?? true
         appsOnOwnScreen = d.object(forKey: "appsOnOwnScreen") as? Bool ?? true
         showScreenshotButtons = d.object(forKey: "showScreenshotButtons") as? Bool ?? true
+        autoHide = AutoHideMode(rawValue: d.string(forKey: "autoHide") ?? "") ?? .never
         Fluent.theme = theme
 
         let nc = NSWorkspace.shared.notificationCenter

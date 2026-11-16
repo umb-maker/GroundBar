@@ -146,3 +146,8 @@
 "Open Settings…" = "Apri Impostazioni…";
 "Groundbar uses these permissions only on your Mac." = "Groundbar usa questi permessi solo sul tuo Mac.";
 "Groundbar is up to date" = "Groundbar è aggiornata";
+"Never" = "Mai";
+"Always" = "Sempre";
+"When a window covers it" = "Quando una finestra la copre";
+"Hide the bar automatically" = "Nascondi automaticamente la barra";
+"A zoomed window reaches under the bar. Hiding the bar keeps the bottom of the window in view; move the pointer to the bottom edge of the screen to bring the bar back." = "Una finestra ingrandita arriva sotto la barra. Nascondendo la barra, il fondo della finestra resta visibile; porta il puntatore sul bordo inferiore dello schermo per farla tornare.";

@@ -166,6 +166,17 @@ private struct TaskbarSettings: View {
                     .disabled(!model.barOnAllScreens)
             }
             Section {
+                Picker("Hide the bar automatically", selection: $model.autoHide) {
+                    ForEach(AutoHideMode.allCases) { Text($0.label).tag($0) }
+                }
+                .pickerStyle(.radioGroup)
+            } footer: {
+                Text("A zoomed window reaches under the bar. Hiding the bar keeps the bottom of the window in view; move the pointer to the bottom edge of the screen to bring the bar back.")
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            Section {
                 Toggle("Show the Bitcoin price", isOn: $model.showCrypto).controlSize(.mini)
                 Picker("Currency", selection: $ticker.currency) {
                     Text("Euro (€)").tag("eur")
