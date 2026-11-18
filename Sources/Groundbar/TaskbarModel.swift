@@ -112,6 +112,11 @@ final class TaskbarModel: ObservableObject {
             // Hiding everything activates Finder: ignore activations caused by the toggle itself.
             if !hiddenForDesktop.isEmpty, Date().timeIntervalSince(desktopToggledAt) > 1.5 { hiddenForDesktop = [] }
         }
+        // An app that relaunches may bring a new icon (an update, or a custom icon set while it was closed).
+        if note.name == NSWorkspace.didLaunchApplicationNotification || note.name == NSWorkspace.didTerminateApplicationNotification,
+           let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
+            iconCache[Self.key(for: app)] = nil
+        }
         refresh()
         scanWindows()
     }
