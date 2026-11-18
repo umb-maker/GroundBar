@@ -96,7 +96,8 @@ final class Updater: ObservableObject {
 
     /// Only a page of Groundbar's own repository on github.com, over HTTPS, is opened from an update notice.
     nonisolated static func isReleaseLink(_ url: URL) -> Bool {
-        url.scheme == "https" && url.host == "github.com" && url.path.hasPrefix("/umb-maker/Groundbar/")
+        // GitHub owner and repository names ignore case (the API now answers with "GroundBar").
+        url.scheme == "https" && url.host == "github.com" && url.path.lowercased().hasPrefix("/umb-maker/groundbar/")
             && url.user == nil && url.port == nil
     }
 
