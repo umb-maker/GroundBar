@@ -57,6 +57,7 @@ final class TaskbarController {
         hk.register(keyCode: HotKeyCenter.d) { [weak self] in self?.flyouts.close(); self?.model.toggleDesktop() }
 
         fullScreen.start(displays: { [unowned self] in Array(bars.keys) })
+        model.onWindowEvent = { [unowned self] in fullScreen.check() }
     }
 
     // MARK: Displays

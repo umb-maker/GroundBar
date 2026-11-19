@@ -18,7 +18,8 @@ final class FullScreenWatcher {
         self.onChange = onChange
     }
 
-    /// Checks when the Space or the front app changes, and once a second. `displays` lists the displays
+    /// Checks when the Space or the front app changes, on `check()` (a window moved or resized), and
+    /// every few seconds. `displays` lists the displays
     /// that have a bar, read at each check.
     func start(displays: @escaping () -> [CGDirectDisplayID]) {
         self.displays = displays
@@ -30,14 +31,14 @@ final class FullScreenWatcher {
                 }
             }
         }
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.check() }
         }
-        timer?.tolerance = 0.3
+        timer?.tolerance = 1
     }
 
     /// Reads the window list off the main thread, then reports.
-    private func check() {
+    func check() {
         guard !checking, !Snapshot.running else { return }
         // Groundbar itself in front (a flyout or Settings): keep the bars as they are.
         guard let front = NSWorkspace.shared.frontmostApplication?.processIdentifier, front != getpid() else { return }

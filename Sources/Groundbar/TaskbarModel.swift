@@ -64,8 +64,15 @@ final class TaskbarModel: ObservableObject {
     /// Latest background window scan per process (see `WindowScanner`).
     private var scans: [pid_t: WindowScan] = [:]
     private var scanning = false
+    private var rescan = false
     private var policyCache: [pid_t: Bool] = [:]
     private var policyCacheDate = Date.distantPast
+    /// Called when an app's window opens, closes, moves or resizes (the full-screen check listens).
+    var onWindowEvent: (() -> Void)?
+    private lazy var windowEvents = WindowEvents { [weak self] in
+        self?.scanWindows()
+        self?.onWindowEvent?()
+    }
     /// Called after each scan with the files shown in each app's windows (feeds the recent-documents history).
     var onDocuments: ((NSRunningApplication, [URL]) -> Void)?
 
@@ -96,11 +103,11 @@ final class TaskbarModel: ObservableObject {
         }
         lastActivePID = NSWorkspace.shared.frontmostApplication?.processIdentifier
         refresh()
-        // Windows open and close without any workspace notification, so poll for them.
-        pollTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
+        // Window changes come from `WindowEvents`; this slow poll catches what no notification reports.
+        pollTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.scanWindows() }
         }
-        pollTimer?.tolerance = 0.3
+        pollTimer?.tolerance = 1
         scanWindows()
     }
 
@@ -124,13 +131,17 @@ final class TaskbarModel: ObservableObject {
     /// Reads every running app's windows on a background queue, then refreshes the bar from the results.
     /// Without Accessibility there is nothing to read: every app counts as having windows.
     private func scanWindows() {
-        guard AXIsProcessTrusted(), !Demo.active, !scanning else { return }
+        guard AXIsProcessTrusted(), !Demo.active else { return }
+        // A window event during a scan must not be lost: scan once more when this one ends.
+        guard !scanning else { rescan = true; return }
         scanning = true
         let apps = regularApps()
+        windowEvents.watch(apps.map(\.processIdentifier))
         WindowScanner.scan(apps.map(\.processIdentifier)) { [weak self] results in
             guard let self else { return }
             self.scanning = false
             self.scans = results
+            if self.rescan { self.rescan = false; DispatchQueue.main.async { self.scanWindows() } }
             for app in apps { if let docs = results[app.processIdentifier]?.documents { self.onDocuments?(app, docs) } }
             self.refresh()
         }

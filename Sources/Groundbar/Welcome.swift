@@ -28,8 +28,10 @@ final class PermissionState: ObservableObject {
     var allGranted: Bool { accessibility && screenRecording }
 
     init() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.refresh() }
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+            // Gone with its window: stop, or the timer would keep waking the app for nothing.
+            guard let self else { timer.invalidate(); return }
+            MainActor.assumeIsolated { self.refresh() }
         }
         timer?.tolerance = 0.3
     }
