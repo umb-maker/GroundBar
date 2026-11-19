@@ -1,16 +1,19 @@
 import AppKit
 
-/// Checks GitHub for a newer release: at launch, then once a day. It only tells the user;
-/// nothing is downloaded or installed automatically.
+/// Checks GitHub for a newer release: at launch, then once a day, and tells the user. The update is
+/// installed only when the user asks for it (the notice or Settings).
 @MainActor
 final class Updater: ObservableObject {
     struct Release: Equatable {
         let version: String
         let url: URL
+        /// `Groundbar.zip` and the SHA-256 GitHub computed for it; without both, updating opens `url`.
+        var asset: URL? = nil
+        var sha256: String? = nil
     }
 
     enum Status: Equatable {
-        case idle, checking, upToDate, available(Release), failed
+        case idle, checking, upToDate, available(Release), installing, failed
     }
 
     @Published private(set) var status: Status = .idle
@@ -77,7 +80,10 @@ final class Updater: ObservableObject {
                 status = .upToDate
                 return
             }
-            let release = Release(version: version, url: url)
+            let zip = (json["assets"] as? [[String: Any]])?.first { $0["name"] as? String == "Groundbar.zip" }
+            let asset = (zip?["browser_download_url"] as? String).flatMap(URL.init(string:)).flatMap { Self.isReleaseLink($0) ? $0 : nil }
+            let digest = (zip?["digest"] as? String).flatMap { $0.hasPrefix("sha256:") ? String($0.dropFirst(7)) : nil }
+            let release = Release(version: version, url: url, asset: asset, sha256: digest)
             status = .available(release)
             if userInitiated || UserDefaults.standard.string(forKey: Self.notifiedKey) != version {
                 UserDefaults.standard.set(version, forKey: Self.notifiedKey)
@@ -88,9 +94,39 @@ final class Updater: ObservableObject {
 
     private func notify(_ release: Release) {
         TaskbarController.shared.toast.show(title: L("Groundbar \(release.version) is available"),
-                                           detail: L("Click to open the download page"),
-                                           symbol: "arrow.down.circle") {
+                                           detail: L("Click to update and restart"),
+                                           symbol: "arrow.down.circle") { [weak self] in
+            self?.install(release)
+        }
+    }
+
+    /// Downloads, checks and installs `release`, then relaunches. Opens the release page instead when
+    /// the running copy can't be replaced, and after any failure.
+    func install(_ release: Release) {
+        Log.write("update: install \(release.version) requested")
+        guard status != .installing else { return }
+        guard let asset = release.asset, let sha256 = release.sha256, UpdateInstaller.canReplace else {
+            Log.write("update: opening the release page (asset \(release.asset != nil), digest \(release.sha256 != nil), replaceable \(UpdateInstaller.canReplace))")
             NSWorkspace.shared.open(release.url)
+            return
+        }
+        status = .installing
+        let bundleID = Bundle.main.bundleIdentifier ?? ""
+        Task { @MainActor in
+            do {
+                let app = try await Task.detached {
+                    try await UpdateInstaller.prepare(asset: asset, sha256: sha256, version: release.version, bundleID: bundleID)
+                }.value
+                try UpdateInstaller.replaceAndRelaunch(with: app)
+            } catch {
+                Log.write("update to \(release.version) failed: \(error)")
+                status = .available(release)
+                TaskbarController.shared.toast.show(title: L("Couldn't install the update"),
+                                                   detail: L("Click to open the download page"),
+                                                   symbol: "exclamationmark.triangle") {
+                    NSWorkspace.shared.open(release.url)
+                }
+            }
         }
     }
 

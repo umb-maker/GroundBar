@@ -290,11 +290,16 @@ private struct AboutSettings: View {
             Label("Groundbar is up to date", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
         case .available(let release):
             Button {
-                NSWorkspace.shared.open(release.url)
+                updater.install(release)
             } label: {
-                Label("Download Groundbar \(release.version)", systemImage: "arrow.down.circle.fill")
+                Label("Update to Groundbar \(release.version)", systemImage: "arrow.down.circle.fill")
             }
             .buttonStyle(.link)
+        case .installing:
+            HStack(spacing: 6) {
+                ProgressView().controlSize(.small)
+                Text("Installing the update…").foregroundStyle(.secondary)
+            }
         case .failed:
             Label("Couldn't reach GitHub", systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
         }

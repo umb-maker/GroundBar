@@ -121,12 +121,15 @@
 "Last checked %@" = "Ultimo controllo: %@";
 "Never checked" = "Mai controllato";
 "Checking…" = "Controllo in corso…";
-"Download Groundbar %@" = "Scarica Groundbar %@";
+"Update to Groundbar %@" = "Aggiorna a Groundbar %@";
+"Installing the update…" = "Installazione dell'aggiornamento…";
 "Couldn't reach GitHub" = "Impossibile contattare GitHub";
 
 /* Update notice */
 "Groundbar %@ is available" = "È disponibile Groundbar %@";
 "Click to open the download page" = "Clic per aprire la pagina di download";
+"Click to update and restart" = "Clic per aggiornare e riavviare";
+"Couldn't install the update" = "Impossibile installare l'aggiornamento";
 
 /* Settings tabs */
 "Appearance" = "Aspetto";
