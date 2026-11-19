@@ -14,7 +14,7 @@ Dependencies point down. Views read stores; presenters own panels; services talk
 | Presenters | `FlyoutPresenter.swift`, `PreviewPresenter.swift`, `Toast.swift`, `FullScreen.swift`, `Panels.swift` | Panels above the bar and when they show or hide |
 | Views | `TaskbarView`, `StartMenuView`, `Flyouts` (calendar, quick settings), `PreviewView`, `Settings`, `Welcome`, seasonal decor (`Halloween`, `Christmas`, `Santa`, `Decor`) | SwiftUI and Core Animation |
 | Stores | `TaskbarModel`, `AppCatalog`, `FileIndex`, `CryptoTicker` (`Crypto.swift`), `SystemStatus`, `Updater`, `PreviewModel` | `ObservableObject`s on the main actor |
-| Services | `WindowService` (Accessibility, window scan off the main thread), `Spaces` (windows on other desktops and in full screen, through two private CoreGraphics calls), `ScreenCapture`, `HotKeys`, `Log`, `Theme`, `Localization`, `Assets` | System APIs |
+| Services | `WindowService` (Accessibility, window scan off the main thread), `WindowEvents` (Accessibility notifications that trigger a rescan, instead of polling), `Spaces` (windows on other desktops and in full screen, through two private CoreGraphics calls), `ScreenCapture`, `HotKeys`, `Log`, `Theme`, `Localization`, `Assets` | System APIs |
 | Debug | `Snapshot.swift` (`--snapshot`, `Demo`) | Repeatable pictures of every surface |
 
 ## The presenters
