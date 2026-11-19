@@ -17,6 +17,7 @@ Disponibile in **italiano** e **inglese**: Groundbar segue la lingua impostata i
 - **Elenco dei documenti per app**: passando sopra un'icona o cliccandola si vedono tutti i documenti aperti, anche quelli ridotti a icona. Un clic porta in primo piano il documento scelto, la ✕ lo chiude.
 - **Documenti recenti** nel clic destro su ogni app (Word, Excel, lettore PDF…).
 - **Cartelle e file fissati**: trascinali sulla barra.
+- **Clic con la rotella** su un'icona per aprire una nuova finestra di quell'app.
 - **Screenshot** di una porzione o di tutto lo schermo, salvati e copiati negli appunti.
 - **Widget Bitcoin**: prezzo in euro, variazione e grafico delle 24 ore. Con un clic si apre un grafico da 24 ore a 1 anno (dati CoinGecko).
 - **Impostazioni rapide**: rete, volume, batteria, tema.
@@ -27,7 +28,7 @@ Disponibile in **italiano** e **inglese**: Groundbar segue la lingua impostata i
 - **Avvio automatico** con il Mac, da attivare dal menu del clic destro sulla barra.
 - **Più schermi**: una barra su ogni monitor, ognuna con le app che hanno finestre su quel monitor (le app fissate su tutte). Le barre compaiono e spariscono quando colleghi o scolleghi uno schermo; Start e anteprime si aprono sullo schermo dove clicchi.
 - **Finestra Impostazioni**: tema, disposizione delle icone, schermi, widget Bitcoin e valuta (EUR/USD), pulsanti screenshot, scorciatoie, aggiornamenti.
-- **Avvisi di aggiornamento**: una volta al giorno Groundbar controlla su GitHub e ti avvisa quando esce una nuova versione (non installa mai niente da sola).
+- **Aggiornamento con un clic**: una volta al giorno Groundbar controlla su GitHub e ti avvisa quando esce una nuova versione. Un clic sull'avviso la installa: il download viene confrontato con l'impronta SHA-256 di GitHub prima che l'app si sostituisca e si riavvii. Senza il tuo clic non installa niente.
 
 | Elenco documenti | Bitcoin | Impostazioni rapide |
 |---|---|---|
@@ -72,7 +73,7 @@ Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. 
   - impostazioni ed elenchi di app e documenti recenti (percorsi dei file), in `~/Library/Preferences/app.groundbar.Groundbar.plist`;
   - gli screenshot, nella cartella che macOS usa per gli screenshot;
   - un piccolo log diagnostico, `~/Library/Logs/Groundbar.log`: solo avvio ed errori, mai titoli di finestre o nomi di file, al massimo 1 MB.
-- **Comandi che esegue:** `screencapture` per gli screenshot, `pmset displaysleepnow` per bloccare lo schermo, System Events per Sospendi, Riavvia, Arresta e Logout, e `defaults write com.apple.dock autohide` + `killall Dock` solo se scegli *Nascondi automaticamente il Dock*.
+- **Comandi che esegue:** `screencapture` per gli screenshot, `pmset displaysleepnow` per bloccare lo schermo, System Events per Sospendi, Riavvia, Arresta e Logout, e `defaults write com.apple.dock autohide` + `killall Dock` solo se scegli *Nascondi automaticamente il Dock*, e `ditto` + `codesign --verify` per scompattare e controllare un aggiornamento che hai scelto di installare.
 - **Nessuna dipendenza di terze parti**, e il codice è aperto.
 - **Verifica il download.** L'app non è notarizzata da Apple, quindi ogni Release riporta l'impronta SHA-256 di `Groundbar.zip`. Confrontala con `shasum -a 256 Groundbar.zip`.
 - **Per rimuovere tutto:** chiudi Groundbar, cancella l'app, poi esegui `defaults delete app.groundbar.Groundbar` e cancella `~/Library/Logs/Groundbar*.log`.

@@ -17,6 +17,7 @@ Available in **English** and **Italian**: Groundbar follows the language set in 
 - **Per-app document list**: hover or click an icon to see every open document of that app, minimised ones included. Click one to bring it to the front, or close it with ✕.
 - **Recent documents** (jump lists) in each app's right-click menu, e.g. Word, Excel or a PDF reader.
 - **Pin folders and files** by dragging them onto the bar.
+- **Middle-click** an icon to open a new window of that app.
 - **Screenshots** of a region or of the whole screen, saved to disk and copied to the clipboard.
 - **Bitcoin widget**: price in euro, 24-hour change and sparkline. Click it for a chart from 24 hours to 1 year (data from CoinGecko).
 - **Quick settings**: network, volume, battery, theme.
@@ -27,7 +28,7 @@ Available in **English** and **Italian**: Groundbar follows the language set in 
 - **Launch at login**, from the bar's right-click menu.
 - **Multiple displays**: a bar on every display, each listing the apps whose windows are on it (pinned apps on all). Bars appear and disappear as you connect displays; Start and previews open on the display you click.
 - **Settings window**: theme, icon layout, displays, Bitcoin widget and currency (EUR/USD), screenshot buttons, shortcuts, updates.
-- **Update notices**: Groundbar checks GitHub once a day and tells you when a new version is out (it never installs anything by itself).
+- **One-click updates**: Groundbar checks GitHub once a day and tells you when a new version is out. Click the notice to install it: the download is checked against GitHub's SHA-256 before the app replaces itself and restarts. Nothing is installed without your click.
 
 | Document list | Bitcoin | Quick settings |
 |---|---|---|
@@ -72,7 +73,7 @@ With ad-hoc signing, macOS may ask for the permissions again after every rebuild
   - settings and the lists of recent apps and recent documents (file paths), in `~/Library/Preferences/app.groundbar.Groundbar.plist`;
   - screenshots, in the folder macOS uses for screenshots;
   - a small diagnostic log, `~/Library/Logs/Groundbar.log`: start-up and errors only, never window titles or file names, capped at 1 MB.
-- **Commands it runs:** `screencapture` for screenshots, `pmset displaysleepnow` to lock the screen, System Events for Sleep, Restart, Shut Down and Log Out, and `defaults write com.apple.dock autohide` + `killall Dock` only when you choose *Automatically Hide the Dock*.
+- **Commands it runs:** `screencapture` for screenshots, `pmset displaysleepnow` to lock the screen, System Events for Sleep, Restart, Shut Down and Log Out, and `defaults write com.apple.dock autohide` + `killall Dock` only when you choose *Automatically Hide the Dock*, and `ditto` + `codesign --verify` to unpack and check an update you chose to install.
 - **No third-party dependencies**, and the source code is open.
 - **Verify your download.** The app is not notarised by Apple, so each release lists the SHA-256 checksum of `Groundbar.zip`. Compare it with `shasum -a 256 Groundbar.zip`.
 - **Remove everything:** quit Groundbar, delete the app, then run `defaults delete app.groundbar.Groundbar` and delete `~/Library/Logs/Groundbar*.log`.
