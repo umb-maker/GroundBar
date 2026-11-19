@@ -13,7 +13,7 @@ Available in **English** and **Italian**: Groundbar follows the language set in 
 ## Features
 
 - **Start menu**: recently used apps, *Recommended* recent files, *All apps*, and search across apps **and files** (Return opens, ↑↓ to select), plus a power menu.
-- **Pinned and running apps** in one bar, with an active-app indicator. Apps that aren't pinned only show up while they have open windows.
+- **Pinned and running apps** in one bar, with an active-app indicator and the app's unread badge (Mail, Messages…), as on the Dock. Apps that aren't pinned only show up while they have open windows. Drag pinned icons to reorder them.
 - **Per-app document list**: hover or click an icon to see every open document of that app, minimised ones included. Click one to bring it to the front, or close it with ✕.
 - **Recent documents** (jump lists) in each app's right-click menu, e.g. Word, Excel or a PDF reader.
 - **Pin folders and files** by dragging them onto the bar.
@@ -90,7 +90,7 @@ With ad-hoc signing, macOS may ask for the permissions again after every rebuild
 - `.build/debug/Groundbar --snapshot <folder>` saves PNGs of the bar and its panels, then quits. `GROUNDBAR_DEMO=1` swaps in sample apps and files, `GROUNDBAR_SNAPSHOT_STEPS=bar,start` limits the steps.
 - `scripts/demo-gif.swift` builds the README demo GIF from those renders.
 - `scripts/social-preview.swift` renders the repository's social preview image; `scripts/app-icon.swift` renders the app icon (then build `Resources/AppIcon.icns` with `sips` and `iconutil`).
-- Only public macOS APIs are used: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon (global hotkeys) and ServiceManagement.
+- macOS APIs used: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon (global hotkeys) and ServiceManagement, plus two private CoreGraphics calls that count windows on other Spaces (`Spaces.swift`).
 
 ## License
 

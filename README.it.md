@@ -13,7 +13,7 @@ Disponibile in **italiano** e **inglese**: Groundbar segue la lingua impostata i
 ## Funzioni
 
 - **Menu Start**: app usate di recente, *Consigliati* con i file aperti di recente, *Tutte le app*, ricerca di app **e file** (Invio apre, ↑↓ per scegliere), menu di arresto.
-- **App fissate e aperte** in un'unica barra, con indicatore dell'app attiva. Le app non fissate compaiono solo finché hanno finestre aperte.
+- **App fissate e aperte** in un'unica barra, con indicatore dell'app attiva e il numero di non letti dell'app (Mail, Messaggi…), come nel Dock. Le app non fissate compaiono solo finché hanno finestre aperte. Le icone fissate si riordinano trascinandole.
 - **Elenco dei documenti per app**: passando sopra un'icona o cliccandola si vedono tutti i documenti aperti, anche quelli ridotti a icona. Un clic porta in primo piano il documento scelto, la ✕ lo chiude.
 - **Documenti recenti** nel clic destro su ogni app (Word, Excel, lettore PDF…).
 - **Cartelle e file fissati**: trascinali sulla barra.
@@ -89,7 +89,7 @@ Con la firma ad-hoc, macOS può richiedere i permessi dopo ogni ricompilazione. 
 
 - `.build/debug/Groundbar --snapshot <cartella>` salva in PNG la barra e i pannelli, poi esce. `GROUNDBAR_DEMO=1` usa app e file d'esempio, `GROUNDBAR_SNAPSHOT_STEPS=bar,start` limita i passaggi.
 - `scripts/demo-gif.swift` crea la GIF dimostrativa del README da quelle immagini.
-- Il codice usa solo API pubbliche di macOS: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon per le scorciatoie globali, ServiceManagement.
+- API di macOS usate: NSWorkspace, Accessibility, ScreenCaptureKit, Spotlight (NSMetadataQuery), CoreAudio, IOKit, Carbon per le scorciatoie globali, ServiceManagement, più due chiamate private di CoreGraphics che contano le finestre sulle altre scrivanie (`Spaces.swift`).
 
 ## Licenza
 
