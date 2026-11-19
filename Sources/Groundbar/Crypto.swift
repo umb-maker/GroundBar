@@ -225,7 +225,7 @@ struct CryptoWidget: View {
         .background(GeometryReader { g in
             Color.clear.onAppear { frame = g.frame(in: .global) }.onChange(of: g.frame(in: .global)) { _, n in frame = n }
         })
-        .help("Bitcoin – 24-hour trend (source: CoinGecko)")
+        .barTooltip(L("Bitcoin – 24-hour trend (source: CoinGecko)"))
     }
 }
 

@@ -25,6 +25,8 @@ final class TaskbarController {
         canShow: { [unowned self] in flyouts.openKind == nil })
     private(set) lazy var toast: ToastPresenter = ToastPresenter(
         screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance })
+    private(set) lazy var tooltip: TooltipPresenter = TooltipPresenter(
+        screen: { [unowned self] in screen }, appearance: { [unowned self] in model.theme.appearance })
 
     private init() {
         model.onDocuments = { app, documents in

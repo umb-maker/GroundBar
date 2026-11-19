@@ -98,7 +98,7 @@ private struct StartButton: View {
             .frame(width: 44, height: 40)
         }
         .buttonStyle(FluentButtonStyle())
-        .help("Start (⌃⌥Space)")
+        .barTooltip(L("Start (⌃⌥Space)"))
         .accessibilityLabel("Start")
     }
 }
@@ -125,7 +125,7 @@ struct StartGlyph: View {
 
 private struct BarIconButton: View {
     let symbol: String
-    let help: LocalizedStringKey
+    let help: String.LocalizationValue
     let action: () -> Void
     @Environment(\.colorScheme) private var scheme
 
@@ -134,8 +134,8 @@ private struct BarIconButton: View {
             Image(systemName: symbol).font(.system(size: 17)).foregroundStyle(Fluent(scheme).text).frame(width: 44, height: 40)
         }
         .buttonStyle(FluentButtonStyle())
-        .help(help)
-        .accessibilityLabel(help)
+        .barTooltip(L(help))
+        .accessibilityLabel(L(help))
     }
 }
 
@@ -178,7 +178,7 @@ private struct TaskButton: View {
             let c = TaskbarController.shared
             if inside { c.previews.hoverBegan(item, anchor: c.screenRect(fromBar: frame)) } else { c.previews.hoverEnded() }
         }
-        .help(item.isRunning ? "" : item.name + (index < 9 ? "  (⌃⌥\(index + 1))" : ""))
+        .barTooltip(item.isRunning ? "" : item.name + (index < 9 ? "  (⌃⌥\(index + 1))" : ""))
         .contextMenu {
             Text(item.name)
             Divider()
@@ -236,7 +236,7 @@ private struct TrayButton: View {
         .background(GeometryReader { g in
             Color.clear.onAppear { frame = g.frame(in: .global) }.onChange(of: g.frame(in: .global)) { _, n in frame = n }
         })
-        .help("Quick settings")
+        .barTooltip(L("Quick settings"))
         .accessibilityLabel("Quick settings")
     }
 }
@@ -259,7 +259,7 @@ private struct ShowDesktopStrip: View {
             TaskbarController.shared.flyouts.close()
             model.toggleDesktop()
         }
-        .help("Show desktop (⌃⌥D)")
+        .barTooltip(L("Show desktop (⌃⌥D)"))
         .accessibilityLabel("Show desktop")
         .accessibilityAddTraits(.isButton)
         .padding(.leading, 4)
