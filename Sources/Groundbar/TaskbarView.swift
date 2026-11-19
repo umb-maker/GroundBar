@@ -139,6 +139,23 @@ private struct BarIconButton: View {
     }
 }
 
+/// The red unread count on a task button, as on the Dock.
+private struct BadgeView: View {
+    let text: String
+
+    var body: some View {
+        // A badge that is only a dot (some apps set a space) shows as a small dot.
+        let label = text.trimmingCharacters(in: .whitespaces)
+        Text(label.count > 3 ? "…" : label)
+            .font(.system(size: 9, weight: .bold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, label.isEmpty ? 0 : 4)
+            .frame(minWidth: label.isEmpty ? 8 : 15, minHeight: label.isEmpty ? 8 : 15)
+            .background(Capsule().fill(Color(red: 0.93, green: 0.2, blue: 0.2)))
+            .accessibilityLabel(label)
+    }
+}
+
 private struct TaskButton: View {
     let item: TaskItem
     let index: Int
@@ -164,6 +181,9 @@ private struct TaskButton: View {
                 }
             }
             .frame(width: 44, height: 40)
+            .overlay(alignment: .topTrailing) {
+                if let badge = item.badge { BadgeView(text: badge).padding(.top, 3).padding(.trailing, 4) }
+            }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

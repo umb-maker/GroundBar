@@ -29,12 +29,14 @@ struct WindowScan: Sendable {
 enum WindowScanner {
     private static let queue = DispatchQueue(label: "app.groundbar.window-scan", qos: .utility)
 
-    static func scan(_ pids: [pid_t], completion: @escaping @MainActor ([pid_t: WindowScan]) -> Void) {
+    /// Also reads the Dock badges, which change without any notification.
+    static func scan(_ pids: [pid_t], completion: @escaping @MainActor ([pid_t: WindowScan], [String: String]) -> Void) {
         queue.async {
             var results: [pid_t: WindowScan] = [:]
             let elsewhere = OtherSpaces.windows()
             for pid in pids { results[pid] = WindowService.scan(pid: pid, elsewhere: elsewhere[pid] ?? []) }
-            DispatchQueue.main.async { MainActor.assumeIsolated { completion(results) } }
+            let badges = DockBadges.read()
+            DispatchQueue.main.async { MainActor.assumeIsolated { completion(results, badges) } }
         }
     }
 }

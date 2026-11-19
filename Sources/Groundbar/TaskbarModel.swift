@@ -12,12 +12,15 @@ struct TaskItem: Identifiable, Equatable {
     var hasWindows: Bool
     /// Displays showing the app's windows (empty when unknown, e.g. without Accessibility).
     var displays: Set<CGDirectDisplayID> = []
+    /// The app's Dock badge (unread count), if any.
+    var badge: String? = nil
 
     var isRunning: Bool { app.map { !$0.isTerminated } ?? false }
 
     static func == (a: TaskItem, b: TaskItem) -> Bool {
         a.id == b.id && a.app?.processIdentifier == b.app?.processIdentifier
             && a.pinned == b.pinned && a.isActive == b.isActive && a.hasWindows == b.hasWindows && a.displays == b.displays
+            && a.badge == b.badge
     }
 }
 
@@ -65,6 +68,8 @@ final class TaskbarModel: ObservableObject {
     private var scans: [pid_t: WindowScan] = [:]
     private var scanning = false
     private var rescan = false
+    /// Dock badges per app bundle path, from the latest scan.
+    private var badges: [String: String] = [:]
     private var policyCache: [pid_t: Bool] = [:]
     private var policyCacheDate = Date.distantPast
     /// Called when an app's window opens, closes, moves or resizes (the full-screen check listens).
@@ -137,10 +142,11 @@ final class TaskbarModel: ObservableObject {
         scanning = true
         let apps = regularApps()
         windowEvents.watch(apps.map(\.processIdentifier))
-        WindowScanner.scan(apps.map(\.processIdentifier)) { [weak self] results in
+        WindowScanner.scan(apps.map(\.processIdentifier)) { [weak self] results, badges in
             guard let self else { return }
             self.scanning = false
             self.scans = results
+            self.badges = badges
             if self.rescan { self.rescan = false; DispatchQueue.main.async { self.scanWindows() } }
             for app in apps { if let docs = results[app.processIdentifier]?.documents { self.onDocuments?(app, docs) } }
             self.refresh()
@@ -219,7 +225,8 @@ final class TaskbarModel: ObservableObject {
         let active = app != nil && app?.processIdentifier == activePID && app?.isHidden == false
         let windows = app.map { pinned ? hasWindows($0) : true } ?? false
         return TaskItem(id: id, name: name, icon: icon, url: url, app: app, pinned: pinned, isActive: active, hasWindows: windows,
-                        displays: app.map { scans[$0.processIdentifier]?.displays ?? [] } ?? [])
+                        displays: app.map { scans[$0.processIdentifier]?.displays ?? [] } ?? [],
+                        badge: Demo.active ? Demo.badges[id] : url.flatMap { badges[$0.standardizedFileURL.path] })
     }
 
     nonisolated static func displayName(_ url: URL) -> String {

@@ -91,6 +91,8 @@ enum Demo {
         let t = Double(i) / 95
         return 62_000 + 2_400 * t + 900 * sin(t * 9) + 350 * sin(t * 31)
     }
+    /// Unread counts on the demo pins.
+    static let badges = ["com.apple.mail": "3"]
     static let pins = ["com.apple.finder", "com.apple.Safari", "com.apple.mail", "com.apple.iCal", "com.apple.Notes",
                        "com.apple.Music", "com.apple.Photos", "com.apple.systempreferences"]
     static let recentApps = ["com.apple.Safari", "com.apple.mail", "com.apple.Notes", "com.apple.iCal", "com.apple.Photos",
