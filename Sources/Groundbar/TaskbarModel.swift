@@ -299,6 +299,25 @@ final class TaskbarModel: ObservableObject {
         NSWorkspace.shared.openApplication(at: url, configuration: cfg)
     }
 
+    /// A new window of a running app: brings it forward and sends it ⌘N, the New shortcut nearly every
+    /// Mac app has. Opens the app (or the pinned file) when it isn't running.
+    static func newWindow(_ item: TaskItem) {
+        guard let app = item.app, !app.isTerminated, AXIsProcessTrusted() else {
+            if let url = item.url { launch(url) }
+            return
+        }
+        app.activate()
+        let pid = app.processIdentifier
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            let source = CGEventSource(stateID: .hidSystemState)
+            for down in [true, false] {
+                let key = CGEvent(keyboardEventSource: source, virtualKey: 0x2D, keyDown: down)  // N
+                key?.flags = .maskCommand
+                key?.postToPid(pid)
+            }
+        }
+    }
+
     /// "Show desktop": hide every app, a second click brings them back.
     func toggleDesktop() {
         desktopToggledAt = Date()

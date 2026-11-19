@@ -160,11 +160,11 @@ private struct BadgeView: View {
 /// over it. A plain gesture, not system drag and drop: the bar is never the key window, and SwiftUI's
 /// drag never starts there.
 @MainActor
-private enum PinDrag {
+enum PinDrag {
     /// The pinned item being dragged.
     static var dragging: String?
     static var endedAt = Date.distantPast
-    /// Each pinned button's frame in its bar window.
+    /// Each task button's frame in its bar window (top-left origin).
     /// shortcut: one map for all bars, so with bars on displays of different widths the last bar drawn wins; key it by display if that matters.
     static var frames: [String: CGRect] = [:]
 
@@ -178,7 +178,19 @@ private enum PinDrag {
             TaskbarController.shared.previews.hide()
         }
         if let target = frames.first(where: { $0.key != id && x >= $0.value.minX && x < $0.value.maxX })?.key {
-            model.movePin(id, to: target)
+            model.movePin(id, to: target)  // does nothing unless the target is pinned too
+        }
+    }
+
+    /// Windows' middle click on a task button opens a new window of that app. SwiftUI has no middle
+    /// click, so a monitor on the bar's own events finds the button under the pointer.
+    static func watchMiddleClicks(model: TaskbarModel) {
+        NSEvent.addLocalMonitorForEvents(matching: .otherMouseUp) { event in
+            guard event.buttonNumber == 2, TaskbarController.shared.isBar(event.window),
+                  let id = frames.first(where: { event.locationInWindow.x >= $0.value.minX && event.locationInWindow.x < $0.value.maxX })?.key,
+                  let item = model.items.first(where: { $0.id == id }) else { return event }
+            TaskbarModel.newWindow(item)
+            return nil
         }
     }
 
@@ -222,8 +234,8 @@ private struct TaskButton: View {
         .animation(.easeOut(duration: 0.15), value: item.isActive)
         .background(GeometryReader { g in
             Color.clear
-                .onAppear { frame = g.frame(in: .global); if item.pinned { PinDrag.frames[item.id] = frame } }
-                .onChange(of: g.frame(in: .global)) { _, new in frame = new; if item.pinned { PinDrag.frames[item.id] = new } }
+                .onAppear { frame = g.frame(in: .global); PinDrag.frames[item.id] = frame }
+                .onChange(of: g.frame(in: .global)) { _, new in frame = new; PinDrag.frames[item.id] = new }
                 .onDisappear { PinDrag.frames[item.id] = nil }
         })
         .onHover { inside in
@@ -240,7 +252,7 @@ private struct TaskButton: View {
             Text(item.name)
             Divider()
             if let url = item.url {
-                Button(item.isRunning ? "New Window" : "Open") { TaskbarModel.launch(url) }
+                Button(item.isRunning ? "New Window" : "Open") { item.isRunning ? TaskbarModel.newWindow(item) : TaskbarModel.launch(url) }
             }
             Button(item.pinned ? "Unpin from taskbar" : "Pin to taskbar") {
                 model.setPinned(item, !item.pinned)

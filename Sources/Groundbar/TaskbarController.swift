@@ -41,6 +41,7 @@ final class TaskbarController {
     func start() {
         catalog.reload()
         layoutBars()
+        PinDrag.watchMiddleClicks(model: model)
 
         NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { _ in
             MainActor.assumeIsolated { TaskbarController.shared.layoutBars() }
@@ -64,6 +65,8 @@ final class TaskbarController {
 
     /// One bar per display (or only the main one, per Settings), keyed by display id.
     private var bars: [CGDirectDisplayID: BarPanel] = [:]
+    /// True for a bar's own panel (not a window list or notice, which are bar panels too).
+    func isBar(_ window: NSWindow?) -> Bool { bars.values.contains { $0 === window } }
 
     static func displayID(of screen: NSScreen) -> CGDirectDisplayID {
         (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value ?? CGMainDisplayID()
