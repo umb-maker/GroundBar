@@ -156,6 +156,38 @@ private struct BadgeView: View {
     }
 }
 
+/// Reordering pinned icons by dragging: the icon under the pointer makes room as the dragged one passes
+/// over it. A plain gesture, not system drag and drop: the bar is never the key window, and SwiftUI's
+/// drag never starts there.
+@MainActor
+private enum PinDrag {
+    /// The pinned item being dragged.
+    static var dragging: String?
+    static var endedAt = Date.distantPast
+    /// Each pinned button's frame in its bar window.
+    /// shortcut: one map for all bars, so with bars on displays of different widths the last bar drawn wins; key it by display if that matters.
+    static var frames: [String: CGRect] = [:]
+
+    /// A click right after a drag is the drag's own mouse-up: ignore it.
+    static var clickAllowed: Bool { dragging == nil && Date().timeIntervalSince(endedAt) > 0.3 }
+
+    static func moved(_ id: String, to x: CGFloat, model: TaskbarModel) {
+        if dragging == nil {
+            dragging = id
+            TaskbarController.shared.tooltip.hide()
+            TaskbarController.shared.previews.hide()
+        }
+        if let target = frames.first(where: { $0.key != id && x >= $0.value.minX && x < $0.value.maxX })?.key {
+            model.movePin(id, to: target)
+        }
+    }
+
+    static func ended() {
+        dragging = nil
+        endedAt = Date()
+    }
+}
+
 private struct TaskButton: View {
     let item: TaskItem
     let index: Int
@@ -167,7 +199,7 @@ private struct TaskButton: View {
 
     var body: some View {
         let f = Fluent(scheme)
-        Button { TaskbarController.shared.click(item, rect: frame) } label: {
+        Button { if PinDrag.clickAllowed { TaskbarController.shared.click(item, rect: frame) } } label: {
             ZStack(alignment: .bottom) {
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
                     .fill(item.isActive ? f.activeBg : (hovering ? f.hover : Color.clear))
@@ -190,8 +222,9 @@ private struct TaskButton: View {
         .animation(.easeOut(duration: 0.15), value: item.isActive)
         .background(GeometryReader { g in
             Color.clear
-                .onAppear { frame = g.frame(in: .global) }
-                .onChange(of: g.frame(in: .global)) { _, new in frame = new }
+                .onAppear { frame = g.frame(in: .global); if item.pinned { PinDrag.frames[item.id] = frame } }
+                .onChange(of: g.frame(in: .global)) { _, new in frame = new; if item.pinned { PinDrag.frames[item.id] = new } }
+                .onDisappear { PinDrag.frames[item.id] = nil }
         })
         .onHover { inside in
             hovering = inside
@@ -199,6 +232,10 @@ private struct TaskButton: View {
             if inside { c.previews.hoverBegan(item, anchor: c.screenRect(fromBar: frame)) } else { c.previews.hoverEnded() }
         }
         .barTooltip(item.isRunning ? "" : item.name + (index < 9 ? "  (⌃⌥\(index + 1))" : ""))
+        // Drag a pinned icon onto another to change the order, as on Windows.
+        .simultaneousGesture(DragGesture(minimumDistance: 8, coordinateSpace: .global)
+            .onChanged { v in if item.pinned { PinDrag.moved(item.id, to: v.location.x, model: model) } }
+            .onEnded { _ in PinDrag.ended() })
         .contextMenu {
             Text(item.name)
             Divider()

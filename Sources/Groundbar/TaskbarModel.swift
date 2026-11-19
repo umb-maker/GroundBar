@@ -243,6 +243,14 @@ final class TaskbarModel: ObservableObject {
         refresh()
     }
 
+    /// Moves a pinned item to where another pinned item is (drag to reorder on the bar).
+    func movePin(_ id: String, to target: String) {
+        guard id != target, let from = pinnedIDs.firstIndex(of: id), let to = pinnedIDs.firstIndex(of: target) else { return }
+        pinnedIDs.move(fromOffsets: [from], toOffset: to > from ? to + 1 : to)
+        UserDefaults.standard.set(pinnedIDs, forKey: "pinned")
+        refresh()
+    }
+
     func pinToBar(_ entry: AppEntry) {
         let id = entry.bundleID ?? entry.url.path
         guard !pinnedIDs.contains(id) else { return }
